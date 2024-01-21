@@ -1,0 +1,17 @@
+{
+    "name": "darkterminal/turso-http",
+    "description": "Turso HTTP SDK for PHP",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Darkterminal\\TursoHttp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Imam Ali Mustofa",
+            "email": "darkterminal@duck.com"
+        }
+    ],
+    "require": {}
+}
