@@ -1,6 +1,6 @@
 {
     "name": "darkterminal/turso-http",
-    "description": "Turso HTTP SDK for PHP",
+    "description": "The TursoHTTP library is a PHP wrapper for Turso HTTP Database API",
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -13,5 +13,7 @@
             "email": "darkterminal@duck.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=7.4"
+    }
 }
