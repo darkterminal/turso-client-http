@@ -1,23 +1,13 @@
-# Turso (HTTP SDK)
+![TursoHTTP](https://i.imgur.com/UgNUwIj.png)
 
 The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API. It simplifies interaction with Turso databases using the Hrana over HTTP protocol. This library provides an object-oriented approach to build and execute SQL queries, retrieve query results, and access various response details.
 
 ## Installation
 
-You can install the `TursoHTTP` library using Composer. Add the following to your `composer.json` file:
-
-```json
-{
-    "require": {
-        "darkterminal/turso-http": "^1.0"
-    }
-}
-```
-
-Then run:
+You can install the `TursoHTTP` library using Composer:
 
 ```bash
-composer install
+composer require darkterminal/turso-http
 ```
 
 ## Usage Example
