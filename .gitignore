@@ -1,2 +1,4 @@
 vendor/
+.vscode/
 taggen
+.env
