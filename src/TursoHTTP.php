@@ -2,7 +2,10 @@
 
 namespace Darkterminal;
 
-class TursoHTTP
+use Darkterminal\TursoHttp\core\Response;
+use Darkterminal\TursoHttp\core\Utils;
+
+class TursoHTTP implements Response
 {
     /**
      * Turso HTTP Database URL
@@ -81,7 +84,7 @@ class TursoHTTP
     public function queryDatabase()
     {
         $url = $this->baseURL . '/v2/pipeline';
-        $this->response = $this->makeRequest('POST', $url, $this->requestData);
+        $this->response = Utils::makeRequest('POST', $url, $this->authToken, $this->requestData);
         $this->resetRequestData();
         return $this;
     }
@@ -101,10 +104,11 @@ class TursoHTTP
      *
      * @return void
      */
-    public function toJSON()
+    public function toJSON(): string|array|null
     {
         return json_encode($this->response, true);
     }
+
 
     /**
      * Return only the baton (connection identifier)
@@ -189,47 +193,6 @@ class TursoHTTP
     {
         $results = $this->getResults();
         return isset($results['replication_index']) ? $results['replication_index'] : null;
-    }
-
-    /**
-     * Perform a cURL request.
-     *
-     * @param string $method The HTTP request method (e.g., "GET", "POST").
-     * @param string $url The URL to send the request to.
-     * @param array $data Optional. The data to be sent with the request (used in POST and PUT requests).
-     *
-     * @return mixed Returns the decoded JSON response as an associative array on success, or a string containing the cURL error on failure.
-     */
-    private function makeRequest(string $method, string $url, array $data = []): mixed
-    {
-        $headers = [
-            'Authorization: Bearer ' . $this->authToken,
-            'Content-Type: application/json',
-        ];
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_HTTPHEADER => $headers,
-        ]);
-
-        if ($method === 'POST' || $method === 'PUT') {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
-        }
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
-        if ($err) {
-            return "cURL Error: " . $err;
-        } else {
-            return json_decode($response, true);
-        }
     }
 
     /**
