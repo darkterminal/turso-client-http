@@ -21,7 +21,7 @@ final class Utils
      */
     public static function useAPI($type, $action): array
     {
-        $endpoints = require 'Repositories'. \DIRECTORY_SEPARATOR .'endpoints.php';
+        $endpoints = require 'Repositories' . \DIRECTORY_SEPARATOR . 'endpoints.php';
 
         if (isset($endpoints[$type][$action])) {
             return $endpoints[$type][$action];
@@ -40,7 +40,7 @@ final class Utils
      */
     public static function validateMemberRole(string $roleName): void
     {
-        $roles = ['owner','admin','member'];
+        $roles = ['owner', 'admin', 'member'];
         if (!in_array($roleName, $roles)) {
             \http_response_code(403);
             throw new \Exception("The role is not valid, role options: owner, admin, or member");
@@ -56,7 +56,7 @@ final class Utils
      */
     public static function validateUserRole(string $roleName): void
     {
-        $roles = ['admin','member'];
+        $roles = ['admin', 'member'];
         if (!in_array($roleName, $roles)) {
             \http_response_code(403);
             throw new \Exception("The role is not valid, role options: owner, admin, or member");
@@ -73,11 +73,11 @@ final class Utils
      *
      * @return mixed Returns the decoded JSON response as an associative array on success, or a string containing the cURL error on failure.
      */
-    public static function makeRequest(string $method, string $url, string $authToken, array $data = []): mixed
+    public static function makeRequest(string $method, string $url, string $authToken, array $data = []): string|array
     {
         $headers = [
-            'Authorization: Bearer ' . $authToken,
-            'Content-Type: application/json',
+            "Authorization: Bearer $authToken",
+            "Content-Type: application/json",
         ];
 
         $curl = curl_init();
@@ -99,9 +99,9 @@ final class Utils
         curl_close($curl);
 
         if ($err) {
-            return "cURL Error: " . $err;
+            return "cURL Error: $err";
         } else {
-            return json_decode($response, true);
+            return self::isJson($response) ? json_decode($response, true) : $response;
         }
     }
 
@@ -114,10 +114,10 @@ final class Utils
      *
      * @return mixed Returns the decoded JSON response as an associative array on success, or a string containing the cURL error on failure.
      */
-    public static function uploadDump(string $url, string $token, string $filePath): mixed
+    public static function uploadDump(string $url, string $token, string $filePath): string|array
     {
         $headers = [
-            'Authorization: Bearer ' . $token,
+            "Authorization: Bearer $token",
         ];
 
         $postData = [
@@ -153,5 +153,69 @@ final class Utils
     public static function closestRegion(string $token): array
     {
         return self::makeRequest('GET', 'https://region.turso.io', $token);
+    }
+
+    /**
+     * Parses a DSN string and returns an associative array of its components.
+     *
+     * @param string $dsn
+     * @return array
+     */
+    public static function parseDsn(string $dsn): array
+    {
+        $result = [];
+        $components = explode('&', $dsn);
+
+        foreach ($components as $component) {
+            $parts = explode('=', $component, 2);
+            if (count($parts) === 2) {
+                $result[$parts[0]] = $parts[1];
+            }
+        }
+
+        return $result;
+    }
+
+    public static function isJson(string $string): bool
+    {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    /**
+     * Removes objects from the results array where response.type is "close".
+     *
+     * @param array $data The input array.
+     * @return array The modified array.
+     */
+    public static function removeCloseResponses(array $data): array
+    {
+        if (isset($data) && is_array($data)) {
+            $data = array_filter($data, function ($result) {
+                return !(
+                    isset($result['type']) && $result['type'] === 'ok' &&
+                    isset($result['response']['type']) && $result['response']['type'] === 'close'
+                );
+            });
+            // Re-index the array
+            $data = array_values($data);
+        }
+        
+        if ($data[0]['type'] === 'error') {
+            throw new LibSQLError($data[0]['error']['message'], $data[0]['error']['code']);
+        }
+        return $data[0]['response']['result'];
+    }
+
+    /**
+     * Checks if an array is associative.
+     *
+     * @param array $array
+     * @return bool
+     */
+    public static function isArrayAssoc(array $array): bool
+    {
+        if (array() === $array) return false;
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }

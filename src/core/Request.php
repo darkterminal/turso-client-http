@@ -1,55 +1,73 @@
 <?php
 
-namespace Darkterminal;
+namespace Darkterminal\TursoHttp\core;
 
+use Darkterminal\TursoHttp\core\Http\LibSQLTypes;
 use Darkterminal\TursoHttp\core\Response;
 use Darkterminal\TursoHttp\core\Utils;
 
-class TursoHTTP implements Response
+class Request implements Response
 {
-    /**
-     * Turso HTTP Database URL
-     *
-     * @var string
-     */
-    private $baseURL;
-
-    /**
-     * Turso Database Auth Token
-     *
-     * @var string
-     */
-    private $authToken;
-
     /**
      * Turso HTTP Request Payload
      *
      * @var array
      */
-    private $requestData;
+    protected $requestData;
 
     /**
      * Turso HTTP Response
      *
      * @var array|object
      */
-    private $response;
+    protected $response;
 
-    /**
-     * Turso HTTP Instance
-     *
-     * @param string $databaseName your turso database name
-     * @param string $organizationName your turso organization name
-     * @param string $authToken your database Auth Token: turso db tokens create <database-name>
-     */
-    public function __construct(string $databaseName, string $organizationName, string $authToken)
-    {
-        $this->baseURL = "https://$databaseName-$organizationName.turso.io";
-        $this->authToken = $authToken;
+    private string $database;
+    private string $token;
+    protected array $bindings = [];
+
+    public function __construct(string $database, string $token){
         $this->requestData = [
             'requests' => [],
         ];
         $this->response = [];
+        $this->database = $database;
+        $this->token = $token;
+    }
+
+    public function setBaton(string $baton): void
+    {
+        $this->requestData['baton'] = $baton;
+    }
+
+    public function prepareRequest(string $query, array $parameters = [], bool $isTransaction = false)
+    {
+        if (Utils::isArrayAssoc($parameters)) {
+            $i = 0;
+            foreach ($parameters as $key => $value) {
+                $type = LibSQLTypes::fromValue($value);
+                $this->bindings['named_args'][$i]['name'] = str_replace([':', '@', '$'], '', $key); 
+                $this->bindings['named_args'][$i]["value"] = $type->bind($value);
+                $i++;
+            }
+        } else {
+            for ($i=0; $i < count($parameters); $i++) { 
+                $type = LibSQLTypes::fromValue($parameters[$i]);
+                $this->bindings['args'][] = $type->bind($parameters[$i]);
+            }
+        }
+        $this->addRequest('execute', $query, $this->bindings);
+        $this->bindings = [];
+        if ($isTransaction === false) {
+            $this->addRequest('close');
+        }
+        return $this;
+    }
+
+    public function closeRequest()
+    {
+        $this->addRequest('close');
+        return $this;
     }
 
     /**
@@ -57,21 +75,22 @@ class TursoHTTP implements Response
      *
      * @param string $type request type is only valid with "execute" (execute a statement on the connection.) or "close" (close the connection.)
      * @param string $stmt raw sql query
-     * @param string $baton The baton is used to identify a connection with the server so that it can be reused
+     * @param array $args query arguments
      *
-     * @return TursoHTTP
+     * @return Request
      */
-    public function addRequest(string $type, string $stmt = '', string $baton = '')
+    public function addRequest(string $type, string $stmt = '', array $args = [])
     {
         if (!in_array($type, ['execute', 'close'])) {
             throw new \Exception("Invalid request type. The valid types is only: execute and close", 1);
-            exit;
         }
 
-        $request = $type === 'close' ? ['type' => $type] : ['type' => $type, 'stmt' => ['sql' => $stmt]];
-        if (!empty($baton)) {
-            $this->requestData['baton'] = $baton;
+        if (empty($args)) {
+            $request = $type === 'close' ? ['type' => $type] : ['type' => $type, 'stmt' => ['sql' => $stmt]];
+        } else {
+            $request = $type === 'close' ? ['type' => $type] : ['type' => $type, 'stmt' => array_merge(['sql' => $stmt], $args)];
         }
+
         $this->requestData['requests'][] = $request;
         return $this;
     }
@@ -79,12 +98,12 @@ class TursoHTTP implements Response
     /**
      * Run query for Turso Database
      *
-     * @return TursoHTTP
+     * @return Request
      */
-    public function queryDatabase()
+    public function executeRequest()
     {
-        $url = $this->baseURL . '/v2/pipeline';
-        $this->response = Utils::makeRequest('POST', $url, $this->authToken, $this->requestData);
+        $url = "{$this->database}/v2/pipeline";
+        $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
         $this->resetRequestData();
         return $this;
     }
@@ -92,9 +111,9 @@ class TursoHTTP implements Response
     /**
      * Return the full result database query in associative array
      *
-     * @return array
+     * @return array|string
      */
-    public function get(): array
+    public function get(): array|string
     {
         return $this->response;
     }
@@ -109,7 +128,6 @@ class TursoHTTP implements Response
         return json_encode($this->response, true);
     }
 
-
     /**
      * Return only the baton (connection identifier)
      *
@@ -117,7 +135,7 @@ class TursoHTTP implements Response
      */
     public function getBaton(): string|null
     {
-        return isset($this->response['baton']) ? $this->response['baton'] : null;
+        return $this->response['baton'] ?? null;
     }
 
     /**
@@ -127,7 +145,7 @@ class TursoHTTP implements Response
      */
     public function getBaseUrl(): string|null
     {
-        return isset($this->response['base_url']) ? $this->response['base_url'] : null;
+        return $this->response['base_url'] ?? null;
     }
 
     /**
@@ -137,7 +155,7 @@ class TursoHTTP implements Response
      */
     public function getResults(): array
     {
-        return isset($this->response['results']) ? $this->response['results'] : null;
+        return $this->response['results'] ?? null;
     }
 
     /**
@@ -148,7 +166,7 @@ class TursoHTTP implements Response
     public function getCols(): array
     {
         $results = $this->getResults();
-        return isset($results['cols']) ? $results['cols'] : null;
+        return $results['cols'] ?? null;
     }
 
     /**
@@ -159,7 +177,7 @@ class TursoHTTP implements Response
     public function getRows(): array
     {
         $results = $this->getResults();
-        return isset($results['rows']) ? $results['rows'] : null;
+        return $results['rows'] ?? null;
     }
 
     /**
@@ -170,7 +188,7 @@ class TursoHTTP implements Response
     public function getAffectedRowCount(): int|null
     {
         $results = $this->getResults();
-        return isset($results['affected_row_count']) ? $results['affected_row_count'] : null;
+        return $results['affected_row_count'] ?? null;
     }
 
     /**
@@ -181,7 +199,7 @@ class TursoHTTP implements Response
     public function getLastInsertRowId(): int|null
     {
         $results = $this->getResults();
-        return isset($results['last_insert_rowid']) ? $results['last_insert_rowid'] : null;
+        return $results['last_insert_rowid'] ?? null;
     }
 
     /**
@@ -192,7 +210,7 @@ class TursoHTTP implements Response
     public function getReplicationIndex(): string|null
     {
         $results = $this->getResults();
-        return isset($results['replication_index']) ? $results['replication_index'] : null;
+        return $results['replication_index'] ?? null;
     }
 
     /**

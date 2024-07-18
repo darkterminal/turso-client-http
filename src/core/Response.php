@@ -12,9 +12,9 @@ interface Response
     /**
      * Get the response as an array.
      *
-     * @return array The response data as an array.
+     * @return array|string The response data as an array|string.
      */
-    public function get(): array;
+    public function get(): array|string;
 
     /**
      * Get the response as a JSON string or array.
