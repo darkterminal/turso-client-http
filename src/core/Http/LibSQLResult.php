@@ -2,7 +2,7 @@
 
 namespace Darkterminal\TursoHttp\core\Http;
 
-use Darkterminal\TursoHttp\core\Enums\LibSQLType;
+use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use DateTime;
@@ -157,7 +157,7 @@ class LibSQLResult
 
     private function cast(string $type, mixed $value)
     {
-        if ($type == LibSQLType::BLOB || !ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) {
+        if ($type == DataType::BLOB || !ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) {
             return base64_encode(base64_encode($value));
         }
 

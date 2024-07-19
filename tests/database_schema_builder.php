@@ -5,7 +5,7 @@
  * PULL REQUEST ARE VERY WELCOME!
  */
 
-use Darkterminal\TursoHttp\core\Enums\LibSQLType;
+use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\sadness\LibSQLBlueprint;
 use Darkterminal\TursoHttp\sadness\LibSQLSchemaBuilder;
@@ -32,7 +32,7 @@ try {
 
     // Add new column in the table
     $schemaBuilder->table('contacts', function(LibSQLBlueprint $table) {
-        $table->addColumn(LibSQLType::TEXT, 'address');
+        $table->addColumn(DataType::TEXT, 'address');
     })->execute();
 
     echo "Column added successfully.\n";

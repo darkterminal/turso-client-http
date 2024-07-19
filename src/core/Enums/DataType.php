@@ -2,7 +2,7 @@
 
 namespace Darkterminal\TursoHttp\core\Enums;
 
-enum LibSQLType: string
+enum DataType: string
 {
     case NULL = 'null';
     case INTEGER = 'integer';

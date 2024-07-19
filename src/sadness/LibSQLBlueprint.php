@@ -2,7 +2,7 @@
 
 namespace Darkterminal\TursoHttp\sadness;
 
-use Darkterminal\TursoHttp\core\Enums\LibSQLType;
+use Darkterminal\TursoHttp\core\Enums\DataType;
 
 class LibSQLBlueprint
 {
@@ -70,9 +70,9 @@ class LibSQLBlueprint
         return $this;
     }
 
-    public function addColumn(LibSQLType $type, string $name, int $length = null)
+    public function addColumn(DataType $type, string $name, int $length = null)
     {
-        $type = LibSQLType::tryFrom($type->value) ? $type->value : 'TEXT';
+        $type = DataType::tryFrom($type->value) ? $type->value : 'TEXT';
         $definition = "$name $type";
         if ($length && $type !== 'BLOB') {
             $definition .= "($length)";
