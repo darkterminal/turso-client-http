@@ -44,7 +44,6 @@ class LibSQLSchemaBuilder
         $trx = $this->db->transaction();
         try {
             foreach ($this->queries as $query) {
-                echo $query . PHP_EOL;
                 $trx->execute($query);
             }
             $trx->commit();
