@@ -2,6 +2,8 @@
 
 namespace Darkterminal\TursoHttp\sadness;
 
+use Darkterminal\TursoHttp\core\Enums\LibSQLType;
+
 class LibSQLBlueprint
 {
     protected $table;
@@ -21,7 +23,7 @@ class LibSQLBlueprint
 
     public function string(string $name, int $length = 255)
     {
-        $this->columns[] = "$name TEXT($length)";
+        $this->columns[] = "$name TEXT";
         return $this;
     }
 
@@ -31,38 +33,66 @@ class LibSQLBlueprint
         return $this;
     }
 
-    public function timestamp($name)
+    public function real(string $name)
     {
-        $this->columns[] = "$name DATETIME DEFAULT CURRENT_TIMESTAMP";
+        $this->columns[] = "$name REAL";
         return $this;
     }
 
-    public function unique($name)
+    public function boolean(string $name)
+    {
+        $this->columns[] = "$name INTEGER";
+        return $this;
+    }
+
+    public function date(string $name)
+    {
+        $this->columns[] = "$name TEXT";
+        return $this;
+    }
+
+    public function blob(string $name)
+    {
+        $this->columns[] = "$name BLOB";
+        return $this;
+    }
+
+    public function timestamps()
+    {
+        $this->columns[] = "created_at DATETIME DEFAULT CURRENT_TIMESTAMP";
+        $this->columns[] = "updated_at DATETIME DEFAULT CURRENT_TIMESTAMP";
+        return $this;
+    }
+
+    public function unique(string $name)
     {
         $this->columns[] = "$name TEXT UNIQUE";
         return $this;
     }
 
-    public function addColumn($type, $name, $length = null, string|null $options = null)
+    public function addColumn(LibSQLType $type, string $name, int $length = null)
     {
+        $type = LibSQLType::tryFrom($type->value) ? $type->value : 'TEXT';
         $definition = "$name $type";
-        $definition .= $length ? "($length)" : "";
-        $definition .= $options ? " $options" : "";
-        $this->alterations[] = "ADD COLUMN $definition";
+        if ($length && $type !== 'BLOB') {
+            $definition .= "($length)";
+        }
+
+        $this->alterations[] = "ADD $definition";
         return $this;
     }
 
     public function toSql()
     {
         $columnsSql = implode(', ', $this->columns);
-        return "CREATE TABLE IF NOT EXISTS $this->table ($columnsSql)";
+        return "CREATE TABLE IF NOT EXISTS {$this->table} ($columnsSql)";
     }
 
     public function alterToSql()
     {
         $queries = [];
         foreach ($this->alterations as $alteration) {
-            $queries[] = "ALTER TABLE $this->table $alteration";
+            $queries[] = "ALTER TABLE {$this->table} $alteration";
         }
         return $queries;
     }
