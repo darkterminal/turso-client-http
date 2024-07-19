@@ -2,8 +2,10 @@
 
 namespace Darkterminal\TursoHttp\core\Http;
 
+use Darkterminal\TursoHttp\core\Enums\LibSQLType;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
+use DateTime;
 
 /**
  * Represents the result of a LibSQL query.
@@ -38,40 +40,19 @@ class LibSQLResult
     {
         if ($mode !== LibSQL::LIBSQL_ALL) {
             $results = [];
-            for ($i=0; $i < count($this->rows); $i++) { 
+            $i = 0;
+            while ($i < count($this->rows)) {
                 if ($mode === LibSQL::LIBSQL_ASSOC) {
-                    $columns = array_map(function($col) {
-                        return $col['name'];
-                    }, $this->cols);
-                    foreach ($this->rows as $row) {
-                        $values = [];
-                        foreach ($row as $data) {
-                            $values[] = $data['value'];
-                        }
-                    }
-                    $assoc = array_combine($columns, $values);
-                    array_push($results, $assoc);
+                    $results = $this->getAssoc($this->cols, $this->rows);  
                 } else if ($mode === LibSQL::LIBSQL_NUM) {
-                    foreach ($this->rows as $row) {
-                        $values = [];
-                        foreach ($row as $data) {
-                            $values[] = $data['value'];
-                        }
-                    }
-                    array_push($results, $values);
+                    $results = $this->getNum($this->rows);
                 } else {
-                    $columns = array_map(function($col) {
-                        return $col['name'];
-                    }, $this->cols);
-                    foreach ($this->rows as $row) {
-                        $values = [];
-                        foreach ($row as $data) {
-                            $values[] = $data['value'];
-                        }
-                    }
-                    $assoc = array_combine($columns, $values);
-                    array_push($results, array_merge($assoc, $values));
+                    array_push($results, array_merge(
+                        $this->getAssoc($this->cols, $this->rows),
+                        $this->getNum($this->rows)
+                    ));
                 }
+                $i++;
             }
             return $results;
         }
@@ -135,5 +116,68 @@ class LibSQLResult
     public function numColumns()
     {
         return count($this->cols);
+    }
+
+    private function getAssoc($tableColumns, $tableRows)
+    {
+        $results = [];
+        $columns = array_map(function($col) {
+            return $col['name'];
+        }, $tableColumns);
+        
+        $values = array_map(function($vals) {
+            $arr_vals = [];
+            $i=0;
+            foreach ($vals as $val) {
+                $arr_vals[] = $this->cast($this->columnType($i), $val['value']);
+                $i++;
+            }
+            return $arr_vals;
+        }, $tableRows);
+
+        foreach ($values as $value) {
+            $results[] = array_combine($columns, $value);
+        }
+
+        return $results;
+    }
+
+    public function getNum($tableRows)
+    {
+        foreach ($tableRows as $row) {
+            $values = [];
+            $i=0;
+            foreach ($row as $data) {
+                $values[] = $this->cast($this->columnType($i), $data['value']);
+                $i++;
+            }
+        }
+        return $values;
+    }
+
+    private function cast(string $type, mixed $value)
+    {
+        if ($type == LibSQLType::BLOB || !ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) {
+            return base64_encode(base64_encode($value));
+        }
+
+        $type = $this->isValidDateTime($value) ? 'datetime' : $type;
+
+        $result = match (strtolower($type)) {
+            'null' => null,
+            'boolean', 'integer' => (int) $value,
+            'double', 'float' => (float) $value,
+            'string', 'text' => (string) $value,
+            'datetime' => new DateTime($value),
+            default => null,
+        };
+
+        return $result;
+    }
+
+    private function isValidDateTime($dateString, $format = 'Y-m-d H:i:s')
+    {
+        $dateTime = DateTime::createFromFormat($format, $dateString);
+        return $dateTime && $dateTime->format($format) === $dateString;
     }
 }
