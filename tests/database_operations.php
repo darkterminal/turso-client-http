@@ -82,7 +82,7 @@ function demo(string $menu)
     sleep(3);
 }
 
-$tests = [
+$tests = $argv[1] ?? [
     'version',
     'create_table',
     'create_user_with_positional_args',
@@ -97,8 +97,12 @@ $tests = [
     'done'
 ];
 
-cleanUp();
-foreach ($tests as $case) {
-    demo($case);
+if (is_string($tests)) {
+    demo($tests);
+} else {
+    cleanUp();
+    foreach ($tests as $case) {
+        demo($case);
+    }
+    cleanUp();
 }
-cleanUp();
