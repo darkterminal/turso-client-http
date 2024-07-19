@@ -3,9 +3,11 @@
 namespace Darkterminal\TursoHttp\core\Http;
 
 use Darkterminal\TursoHttp\core\Enums\DataType;
+use Darkterminal\TursoHttp\core\Enums\Timezone;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use DateTime;
+use DateTimeZone;
 
 /**
  * Represents the result of a LibSQL query.
@@ -43,14 +45,15 @@ class LibSQLResult
             $i = 0;
             while ($i < count($this->rows)) {
                 if ($mode === LibSQL::LIBSQL_ASSOC) {
-                    $results = $this->getAssoc($this->cols, $this->rows);  
+                    $results = $this->getAssoc($this->cols, $this->rows);
                 } else if ($mode === LibSQL::LIBSQL_NUM) {
                     $results = $this->getNum($this->rows);
                 } else {
                     array_push($results, array_merge(
                         $this->getAssoc($this->cols, $this->rows),
                         $this->getNum($this->rows)
-                    ));
+                    )
+                    );
                 }
                 $i++;
             }
@@ -121,13 +124,13 @@ class LibSQLResult
     private function getAssoc($tableColumns, $tableRows)
     {
         $results = [];
-        $columns = array_map(function($col) {
+        $columns = array_map(function ($col) {
             return $col['name'];
         }, $tableColumns);
-        
-        $values = array_map(function($vals) {
+
+        $values = array_map(function ($vals) {
             $arr_vals = [];
-            $i=0;
+            $i = 0;
             foreach ($vals as $val) {
                 $arr_vals[] = $this->cast($this->columnType($i), $val['value']);
                 $i++;
@@ -146,7 +149,7 @@ class LibSQLResult
     {
         foreach ($tableRows as $row) {
             $values = [];
-            $i=0;
+            $i = 0;
             foreach ($row as $data) {
                 $values[] = $this->cast($this->columnType($i), $data['value']);
                 $i++;
@@ -157,18 +160,21 @@ class LibSQLResult
 
     private function cast(string $type, mixed $value)
     {
-        if ($type == DataType::BLOB || !ctype_print($value) || ! mb_check_encoding($value, 'UTF-8')) {
+        if ($type == DataType::BLOB || !ctype_print($value) || !mb_check_encoding($value, 'UTF-8')) {
             return base64_encode(base64_encode($value));
         }
 
         $type = $this->isValidDateTime($value) ? 'datetime' : $type;
+
+        $timezoneString = getenv('DB_TIMEZONE');
+        $timezone = empty($timezoneString) ? null : Timezone::fromString($timezoneString);
 
         $result = match (strtolower($type)) {
             'null' => null,
             'boolean', 'integer' => (int) $value,
             'double', 'float' => (float) $value,
             'string', 'text' => (string) $value,
-            'datetime' => new DateTime($value),
+            'datetime' => $timezone->convertFromUtc($value),
             default => null,
         };
 

@@ -11,12 +11,27 @@ The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API (Only). It 
 - A cup of coffee and the music you hate the most
 - Dancing (optional: if you are willing)
 
+## Features
+- **[libSQL Native Extension](https://github.com/tursodatabase/turso-client-php)** like API Interface
+- Schema Builder
+- Query Builder
+- Turso Platform API
+- Timezone Support
+
 ## Installation
 
 You can install the **TursoHTTP** library using Composer:
 
 ```bash
 composer require darkterminal/turso-http
+```
+
+## Setting Up Timezone
+
+Set the database display timezome in your `env` variable. See the list of timezones [here](https://www.php.net/manual/en/timezones.php)
+
+```env
+DB_TIMEZOME=Asia/Jakarta
 ```
 
 ## Usage Example
@@ -92,6 +107,64 @@ try {
 } catch (Exception $e) {
     echo "An error occurred: " . $e->getMessage();
 }
+```
+
+## Raw Query
+
+```php
+<?php
+
+/**
+ * THIS IS POOR TESTING, IF YOU HAVE KNOWLEDGE ABOUT UNIT TESTING
+ * PULL REQUEST ARE VERY WELCOME!
+ */
+
+use Darkterminal\TursoHttp\LibSQL;
+
+require_once getcwd() . '/vendor/autoload.php';
+
+$dbname     = getenv('DB_URL');
+$authToken  = getenv('DB_TOKEN');
+$db         = new LibSQL("dbname=$dbname;authToken=$authToken");
+
+$query = <<<SQL
+INSERT INTO contacts (name, email, phone, address) VALUES (?, ?, ?, ?)
+SQL;
+
+$db->execute($query, [
+    'Imam Ali Mustofa',
+    'darkterminal@duck.com',
+    '08123456789',
+    'Punk Univers'
+]);
+```
+
+## Query Builder
+
+```php
+<?php
+
+/**
+ * THIS IS POOR TESTING, IF YOU HAVE KNOWLEDGE ABOUT UNIT TESTING
+ * PULL REQUEST ARE VERY WELCOME!
+ */
+
+use Darkterminal\TursoHttp\LibSQL;
+use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
+
+require_once getcwd() . '/vendor/autoload.php';
+
+$dbname = getenv('DB_URL');
+$authToken = getenv('DB_TOKEN');
+$db = new LibSQL("dbname=$dbname;authToken=$authToken");
+
+$sql = new LibSQLQueryBuilder($db);
+
+$contacts = $sql->table('contacts')
+    ->where('address', '=', 'Punk Universe')
+    ->get();
+
+var_dump($contacts);
 ```
 
 ## Turso Platform API - PHP

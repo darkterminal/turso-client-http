@@ -12,12 +12,15 @@ require_once getcwd() . '/vendor/autoload.php';
 
 $dbname = getenv('DB_URL');
 $authToken = getenv('DB_TOKEN');
-$db = new LibSQL("dbname=$dbname&authToken=$authToken");
+$db = new LibSQL("dbname=$dbname;authToken=$authToken");
 
-$builder = new LibSQLQueryBuilder($db);
+$sql = new LibSQLQueryBuilder($db);
 
-$users = $builder->table('users')->get();
-var_dump($users);
+$contacts = $sql->table('contacts')
+    ->where('address', '=', 'Punk Universe')
+    ->get();
 
-$users = $builder->get('users');
-var_dump($users);
+var_dump($contacts);
+
+// $contacts = $sql->get('contacts');
+// var_dump($contacts);

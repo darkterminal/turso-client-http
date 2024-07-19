@@ -11,7 +11,7 @@ require_once getcwd() . '/vendor/autoload.php';
 
 $dbname = getenv('DB_URL');
 $authToken = getenv('DB_TOKEN');
-$db = new LibSQL("dbname=$dbname&authToken=$authToken");
+$db = new LibSQL("dbname=$dbname;authToken=$authToken");
 
 function cleanUp()
 {

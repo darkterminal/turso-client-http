@@ -5,8 +5,8 @@
  * PULL REQUEST ARE VERY WELCOME!
  */
 
-use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\LibSQL;
+use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\sadness\LibSQLBlueprint;
 use Darkterminal\TursoHttp\sadness\LibSQLSchemaBuilder;
 
@@ -16,7 +16,7 @@ try {
     $dbname = getenv('DB_URL');
     $authToken = getenv('DB_TOKEN');
 
-    $db = new LibSQL("dbname=$dbname&authToken=$authToken");
+    $db = new LibSQL("dbname=$dbname;authToken=$authToken");
     $schemaBuilder = new LibSQLSchemaBuilder($db);
 
     // Creating table
@@ -38,9 +38,9 @@ try {
     echo "Column added successfully.\n";
 
     // Drop the table
-    $schemaBuilder->drop('contacts')->execute();
+    // $schemaBuilder->drop('contacts')->execute();
 
-    echo "Table contacts successfully dropped!.\n";
+    // echo "Table contacts successfully dropped!.\n";
 } catch (Exception $e) {
     echo "An error occurred: " . $e->getMessage();
 }

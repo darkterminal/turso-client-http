@@ -9,13 +9,19 @@ use Darkterminal\TursoHttp\LibSQL;
 
 require_once getcwd() . '/vendor/autoload.php';
 
-$dbname = getenv('DB_URL');
-$authToken = getenv('DB_TOKEN');
-$db = new LibSQL("dbname=$dbname&authToken=$authToken");
+$dbname     = getenv('DB_URL');
+$authToken  = getenv('DB_TOKEN');
+$db         = new LibSQL("dbname=$dbname;authToken=$authToken");
 
-$createContact = $db->execute("INSERT INTO contacts (name, email, phone) VALUES (?, ?, ?)", [
+$query = <<<SQL
+INSERT INTO contacts (name, email, phone, address) VALUES (?, ?, ?, ?)
+SQL;
+
+$createContact = $db->execute($query, [
     'Imam Ali Mustofa',
     'darkterminal@duck.com',
-    '08123456789'
+    '08123456789',
+    'Punk Univers'
 ]);
+
 var_dump($createContact);

@@ -2,6 +2,8 @@
 
 namespace Darkterminal\TursoHttp\core;
 
+use Exception;
+
 /**
  * Class Utils
  *
@@ -17,7 +19,7 @@ final class Utils
      *
      * @return array The endpoint configuration for the specified type and action.
      *
-     * @throws \Exception Throws an exception with a 403 HTTP response code if the endpoint configuration is not found.
+     * @throws Exception Throws an exception with a 403 HTTP response code if the endpoint configuration is not found.
      */
     public static function useAPI($type, $action): array
     {
@@ -27,7 +29,7 @@ final class Utils
             return $endpoints[$type][$action];
         } else {
             \http_response_code(403);
-            throw new \Exception("Endpoint configuration not found for $type/$action");
+            throw new Exception("Endpoint configuration not found for $type/$action");
         }
     }
 
@@ -36,14 +38,14 @@ final class Utils
      *
      * @param string $roleName The name of the member role.
      *
-     * @throws \Exception Throws an exception with a 403 HTTP response code if the role is not valid.
+     * @throws Exception Throws an exception with a 403 HTTP response code if the role is not valid.
      */
     public static function validateMemberRole(string $roleName): void
     {
         $roles = ['owner', 'admin', 'member'];
         if (!in_array($roleName, $roles)) {
             \http_response_code(403);
-            throw new \Exception("The role is not valid, role options: owner, admin, or member");
+            throw new Exception("The role is not valid, role options: owner, admin, or member");
         }
     }
 
@@ -52,14 +54,14 @@ final class Utils
      *
      * @param string $roleName The name of the user role.
      *
-     * @throws \Exception Throws an exception with a 403 HTTP response code if the role is not valid.
+     * @throws Exception Throws an exception with a 403 HTTP response code if the role is not valid.
      */
     public static function validateUserRole(string $roleName): void
     {
         $roles = ['admin', 'member'];
         if (!in_array($roleName, $roles)) {
             \http_response_code(403);
-            throw new \Exception("The role is not valid, role options: owner, admin, or member");
+            throw new Exception("The role is not valid, role options: owner, admin, or member");
         }
     }
 
@@ -164,7 +166,7 @@ final class Utils
     public static function parseDsn(string $dsn): array
     {
         $result = [];
-        $components = explode('&', $dsn);
+        $components = preg_split('/[&;]/', $dsn);
 
         foreach ($components as $component) {
             $parts = explode('=', $component, 2);
@@ -215,7 +217,7 @@ final class Utils
      */
     public static function isArrayAssoc(array $array): bool
     {
-        if (array() === $array) return false;
+        if ([] === $array) return false;
         return array_keys($array) !== range(0, count($array) - 1);
     }
 }
