@@ -26,7 +26,8 @@ class Request implements Response
     private string $token;
     protected array $bindings = [];
 
-    public function __construct(string $database, string $token){
+    public function __construct(string $database, string $token)
+    {
         $this->requestData = [
             'requests' => [],
         ];
@@ -46,12 +47,12 @@ class Request implements Response
             $i = 0;
             foreach ($parameters as $key => $value) {
                 $type = LibSQLTypes::fromValue($value);
-                $this->bindings['named_args'][$i]['name'] = str_replace([':', '@', '$'], '', $key); 
+                $this->bindings['named_args'][$i]['name'] = str_replace([':', '@', '$'], '', $key);
                 $this->bindings['named_args'][$i]["value"] = $type->bind($value);
                 $i++;
             }
         } else {
-            for ($i=0; $i < count($parameters); $i++) { 
+            for ($i = 0; $i < count($parameters); $i++) {
                 $type = LibSQLTypes::fromValue($parameters[$i]);
                 $this->bindings['args'][] = $type->bind($parameters[$i]);
             }
@@ -98,14 +99,18 @@ class Request implements Response
     /**
      * Run query for Turso Database
      *
-     * @return Request
+     * @return Request|LibSQLError
      */
     public function executeRequest()
     {
-        $url = "{$this->database}/v2/pipeline";
-        $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
-        $this->resetRequestData();
-        return $this;
+        try {
+            $url = "{$this->database}/v2/pipeline";
+            $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
+            $this->resetRequestData();
+            return $this;
+        } catch (\Exception $e) {
+            throw new LibSQLError($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
