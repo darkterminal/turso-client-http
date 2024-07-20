@@ -2,22 +2,30 @@
 
 namespace Darkterminal\TursoHttp\core\Http;
 
-use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 
 /**
  * Represents a database transaction in LibSQL.
+ *
+ * @package Darkterminal\TursoHttp\core\Http
  */
 class LibSQLTransaction
 {
+    /**
+     * @var int The number of affected rows.
+     */
     protected int $affected_rows = 0;
+
+    /**
+     * @var bool Whether auto commit is enabled.
+     */
     protected bool $auto_commit = true;
-    
+
     /**
      * Creates a new LibSQLTransaction instance.
      *
-     * @param LibSQL $db The connection ID.
-     * @param string $trx_mode The transaction mode.
+     * @param LibSQL $db The LibSQL database connection instance.
+     * @param string $trx_mode The transaction mode ('DEFERRED', 'READ', 'WRITE').
      */
     public function __construct(protected LibSQL $db, protected string $trx_mode)
     {
@@ -32,7 +40,7 @@ class LibSQLTransaction
      *
      * @return int The number of rows changed.
      */
-    public function changes()
+    public function changes(): int
     {
         return $this->affected_rows;
     }
@@ -42,7 +50,7 @@ class LibSQLTransaction
      *
      * @return bool True if autocommit is enabled, otherwise false.
      */
-    public function isAutocommit()
+    public function isAutocommit(): bool
     {
         return $this->auto_commit;
     }
@@ -50,10 +58,10 @@ class LibSQLTransaction
     /**
      * Executes an SQL statement within the transaction.
      *
-     * @param string $stmt The SQL statement to execute.
+     * @param string $sql The SQL statement to execute.
      * @param array $parameters The parameters for the statement (optional).
      *
-     * @return LibSQLTransaction
+     * @return LibSQLTransaction The current transaction instance.
      */
     public function execute(string $sql, array $parameters = []): LibSQLTransaction
     {
@@ -64,10 +72,10 @@ class LibSQLTransaction
     /**
      * Executes a query within the transaction and returns the result set.
      *
-     * @param string $stmt The SQL statement to execute.
+     * @param string $sql The SQL statement to execute.
      * @param array $parameters The parameters for the statement (optional).
      *
-     * @return LibSQLResult
+     * @return LibSQLResult The result of the query.
      */
     public function query(string $sql, array $parameters = []): LibSQLResult
     {
@@ -80,7 +88,7 @@ class LibSQLTransaction
      *
      * @return void
      */
-    public function commit()
+    public function commit(): void
     {
         $this->db->getConnection()
             ->addRequest('execute', 'COMMIT')
@@ -93,7 +101,7 @@ class LibSQLTransaction
      *
      * @return void
      */
-    public function rollback()
+    public function rollback(): void
     {
         $this->db->getConnection()
             ->addRequest('execute', 'ROLLBACK')
@@ -101,18 +109,14 @@ class LibSQLTransaction
             ->executeRequest();
     }
 
+    /**
+     * Set whether auto commit is enabled.
+     *
+     * @param bool $yes True to enable auto commit, false to disable.
+     * @return void
+     */
     private function setIsAutoCommit(bool $yes): void
     {
         $this->auto_commit = $yes;
-    }
-
-    private function setChanges(array|int $results): void
-    {
-        if (is_array($results)) {
-            $result = Utils::removeCloseResponses($results['results']);
-            $this->affected_rows = $result['affected_row_count'];
-        } else {
-            $this->affected_rows = $results;
-        }
     }
 }
