@@ -147,8 +147,8 @@ class LibSQLResult
 
     public function getNum($tableRows)
     {
+        $values = [];
         foreach ($tableRows as $row) {
-            $values = [];
             $i = 0;
             foreach ($row as $data) {
                 $values[] = $this->cast($this->columnType($i), $data['value']);
