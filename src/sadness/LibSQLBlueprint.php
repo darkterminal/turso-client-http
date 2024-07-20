@@ -8,11 +8,19 @@ class LibSQLBlueprint
 {
     protected $table;
     protected $columns = [];
+    protected $foreignKeys = [];
     protected $alterations = [];
 
     public function __construct($table)
     {
         $this->table = $table;
+    }
+
+    public static function create(string $table, callable $callback)
+    {
+        $blueprint = new self($table);
+        $callback($blueprint);
+        return $blueprint->toSql();
     }
 
     public function increments(string $name)
@@ -64,6 +72,13 @@ class LibSQLBlueprint
         return $this;
     }
 
+    public function notNull()
+    {
+        $lastColumnIndex = count($this->columns) - 1;
+        $this->columns[$lastColumnIndex] = rtrim($this->columns[$lastColumnIndex]) . " NOT NULL";
+        return $this;
+    }
+
     public function unique(string $name)
     {
         $this->columns[] = "$name TEXT UNIQUE";
@@ -82,10 +97,17 @@ class LibSQLBlueprint
         return $this;
     }
 
+    public function foreignKey(string $column, string $references, string $on, string $onUpdate = 'CASCADE', string $onDelete = 'CASCADE')
+    {
+        $this->foreignKeys[] = "FOREIGN KEY ($column) REFERENCES $on($references) ON UPDATE $onUpdate ON DELETE $onDelete";
+        return $this;
+    }
+
     public function toSql()
     {
         $columnsSql = implode(', ', $this->columns);
-        return "CREATE TABLE IF NOT EXISTS {$this->table} ($columnsSql)";
+        $foreignKeysSql = !empty($this->foreignKeys) ? ', ' . implode(', ', $this->foreignKeys) : '';
+        return "CREATE TABLE IF NOT EXISTS {$this->table} ($columnsSql$foreignKeysSql)";
     }
 
     public function alterToSql()
