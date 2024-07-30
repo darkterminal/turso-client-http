@@ -6,7 +6,9 @@
         "psr-4": {
             "Darkterminal\\TursoHttp\\": "src/"
         },
-        "files": ["src/core/helpers.php"]
+        "files": [
+            "src/core/helpers.php"
+        ]
     },
     "authors": [
         {
@@ -25,5 +27,6 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
-    }
+    },
+    "version": "0.1.0"
 }
