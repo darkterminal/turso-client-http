@@ -2,4 +2,4 @@ vendor/
 .vscode/
 taggen
 .env
-*.php
+test.php
