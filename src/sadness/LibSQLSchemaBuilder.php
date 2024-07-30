@@ -4,17 +4,43 @@ namespace Darkterminal\TursoHttp\sadness;
 
 use Darkterminal\TursoHttp\LibSQL;
 
+/**
+ * Class LibSQLSchemaBuilder
+ *
+ * A class to build and manage database schemas using the LibSQL database connection.
+ *
+ * @package Darkterminal\TursoHttp\sadness
+ */
 class LibSQLSchemaBuilder
 {
-    protected $db;
-    protected $queries = [];
+    /**
+     * @var LibSQL The LibSQL database connection instance.
+     */
+    protected LibSQL $db;
 
+    /**
+     * @var array The array of SQL queries to be executed.
+     */
+    protected array $queries = [];
+
+    /**
+     * Creates a new LibSQLSchemaBuilder instance.
+     *
+     * @param LibSQL $db The LibSQL database connection instance.
+     */
     public function __construct(LibSQL $db)
     {
         $this->db = $db;
     }
 
-    public function create($table, $callback)
+    /**
+     * Creates a new table.
+     *
+     * @param string $table The name of the table.
+     * @param callable $callback The callback function to define the table schema.
+     * @return LibSQLSchemaBuilder The current schema builder instance.
+     */
+    public function create(string $table, callable $callback): LibSQLSchemaBuilder
     {
         $blueprint = new LibSQLBlueprint($table);
         $callback($blueprint);
@@ -23,7 +49,14 @@ class LibSQLSchemaBuilder
         return $this;
     }
 
-    public function table($table, $callback)
+    /**
+     * Modifies an existing table.
+     *
+     * @param string $table The name of the table.
+     * @param callable $callback The callback function to alter the table schema.
+     * @return LibSQLSchemaBuilder The current schema builder instance.
+     */
+    public function table(string $table, callable $callback): LibSQLSchemaBuilder
     {
         $blueprint = new LibSQLBlueprint($table);
         $callback($blueprint);
@@ -32,14 +65,26 @@ class LibSQLSchemaBuilder
         return $this;
     }
 
-    public function drop($table)
+    /**
+     * Drops an existing table.
+     *
+     * @param string $table The name of the table.
+     * @return LibSQLSchemaBuilder The current schema builder instance.
+     */
+    public function drop(string $table): LibSQLSchemaBuilder
     {
         $query = "DROP TABLE IF EXISTS $table";
         $this->queries[] = $query;
         return $this;
     }
 
-    public function execute()
+    /**
+     * Executes all the accumulated queries within a transaction.
+     *
+     * @return void
+     * @throws \Exception If an error occurs during execution.
+     */
+    public function execute(): void
     {
         $trx = $this->db->transaction();
         try {
@@ -48,7 +93,7 @@ class LibSQLSchemaBuilder
             }
             $trx->commit();
         } catch (\Exception $e) {
-            $trx->rollBack();
+            $trx->rollback();
             throw $e;
         } finally {
             $this->queries = [];
