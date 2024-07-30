@@ -7,7 +7,6 @@ use Darkterminal\TursoHttp\core\Enums\Timezone;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use DateTime;
-use DateTimeZone;
 
 /**
  * Represents the result of a LibSQL query.
@@ -49,14 +48,17 @@ class LibSQLResult
                 } else if ($mode === LibSQL::LIBSQL_NUM) {
                     $results = $this->getNum($this->rows);
                 } else {
-                    array_push($results, array_merge(
-                        $this->getAssoc($this->cols, $this->rows),
-                        $this->getNum($this->rows)
-                    )
+                    array_push(
+                        $results,
+                        array_merge(
+                            $this->getAssoc($this->cols, $this->rows),
+                            $this->getNum($this->rows)
+                        )
                     );
                 }
                 $i++;
             }
+
             return $results;
         }
 
@@ -132,7 +134,8 @@ class LibSQLResult
             $arr_vals = [];
             $i = 0;
             foreach ($vals as $val) {
-                $arr_vals[] = $this->cast($this->columnType($i), $val['value']);
+                if ($val['type'] === "null") $val['value'] = null;
+                $arr_vals[] = $this->cast($val['type'], $val['value']);
                 $i++;
             }
             return $arr_vals;
@@ -160,14 +163,14 @@ class LibSQLResult
 
     private function cast(string $type, mixed $value)
     {
-        if ($type == DataType::BLOB || !ctype_print($value) || !mb_check_encoding($value, 'UTF-8')) {
+        if ($type == DataType::BLOB) {
             return base64_encode(base64_encode($value));
         }
 
         $type = $this->isValidDateTime($value) ? 'datetime' : $type;
 
         $timezoneString = getenv('DB_TIMEZONE');
-        $timezone = empty($timezoneString) ? null : Timezone::fromString($timezoneString);
+        $timezone = empty($timezoneString) ? Timezone::fromString('UTC') : Timezone::fromString($timezoneString);
 
         $result = match (strtolower($type)) {
             'null' => null,
