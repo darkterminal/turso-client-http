@@ -5,7 +5,8 @@
     "autoload": {
         "psr-4": {
             "Darkterminal\\TursoHttp\\": "src/"
-        }
+        },
+        "files": ["src/core/helpers.php"]
     },
     "authors": [
         {
