@@ -1,0 +1,1 @@
+INSERT INTO accounts VALUES (100, 19000), (200, 51000);
