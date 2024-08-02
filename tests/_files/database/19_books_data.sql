@@ -1,0 +1,1 @@
+INSERT INTO books VALUES ( 1, 'TO KILL A MOCKINGBIRD', 'Harper Lee', 'Fiction', 12.99 ), ( 2, '1984', 'George Orwell', 'Science Fiction', 10.99 ), ( 3, 'THE GREAT GATSBY', 'F. Scott Fitzgerald', 'Classic', 9.99 ), ( 4, 'PRIDE AND PREJUDICE', 'Jane Austen', 'Romance', 8.99 ), ( 5, 'THE CATCHER IN THE RYE', 'J.D. Salinger', 'Fiction', 11.99 );
