@@ -1,0 +1,79 @@
+# Built-in Helpers
+
+| Function Name                  | Description                                                                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `useDB`                        | Returns a new instance of LibSQL using the database connection details stored in the environment variables DB_URL and DB_TOKEN.                                          |
+| `useQueryBuilder`              | Returns a new instance of LibSQLQueryBuilder using the database connection returned by the useDB() function.                                                             |
+| `sqlite_functions`             | Returns an array of SQLite functions.                                                                                                                                    |
+| `sqlite_avg`                   | Returns the SQL expression for calculating the average of a column.                                                                                                      |
+| `sqlite_count`                 | Returns the SQL expression for counting the number of rows in a table or the number of occurrences of a specific column value.                                           |
+| `sqlite_max`                   | Returns the SQL expression for calculating the maximum value of a column.                                                                                                |
+| `sqlite_min`                   | Returns the SQL expression for calculating the minimum value of a column.                                                                                                |
+| `sqlite_sum`                   | Returns the SQL expression for calculating the sum of a column.                                                                                                          |
+| `sqlite_group_concat`          | Returns the SQL expression for concatenating values of a column in SQLite.                                                                                               |
+| `sqlite_substr`                | Returns the SQL expression for extracting a substring from a column in SQLite.                                                                                           |
+| `sqlite_trim`                  | Returns the SQL expression for trimming leading and trailing whitespace from a column in SQLite.                                                                         |
+| `sqlite_ltrim`                 | Returns the SQL expression for removing leading whitespace from a column in SQLite.                                                                                      |
+| `sqlite_rtrim`                 | Trims whitespace from the right side of a SQLite column value.                                                                                                           |
+| `sqlite_length`                | Returns the SQL expression for getting the length of a column in SQLite.                                                                                                 |
+| `sqlite_replace`               | Returns the SQL expression for replacing a substring in a SQLite column.                                                                                                 |
+| `sqlite_upper`                 | Returns the SQL expression for converting a SQLite column value to uppercase.                                                                                            |
+| `sqlite_lower`                 | Returns the SQL expression for converting a SQLite column value to lowercase.                                                                                            |
+| `sqlite_instr`                 | Returns the SQL expression for finding the position of a substring in a SQLite column.                                                                                   |
+| `sqlite_coalesce`              | Returns the SQL expression for the COALESCE function in SQLite, which returns the first non-NULL value from a list of expressions.                                       |
+| `sqlite_ifnull`                | Returns the SQL expression for the IFNULL function in SQLite, which returns the value of the first argument if it is not NULL, otherwise it returns the second argument. |
+| `sqlite_iif`                   | Returns a string that represents an SQLite IIF function call.                                                                                                            |
+| `sqlite_nullif`                | Returns a string that represents an SQLite NULLIF function call.                                                                                                         |
+| `sqlite_date`                  | Returns a string that represents the SQLite DATE function call.                                                                                                          |
+| `sqlite_time`                  | Returns a string that represents the SQLite TIME function call.                                                                                                          |
+| `sqlite_datetime`              | Returns a string that represents the SQLite DATETIME function call.                                                                                                      |
+| `sqlite_julianday`             | Returns the Julian day number for a given timestamp.                                                                                                                     |
+| `sqlite_strftime`              | Returns a string that represents the SQLite STRFTIME function call.                                                                                                      |
+| `sqlite_abs`                   | Returns the absolute value of a number.                                                                                                                                  |
+| `sqlite_random`                | Returns a string representing a SQLite random function.                                                                                                                  |
+| `sqlite_round`                 | Returns a string representing a SQLite ROUND function call.                                                                                                              |
+| `sqlite_and_equals`            | Generates an SQL AND condition string based on an associative array of comparisons.                                                                                      |
+| `sqlite_or_equals`             | Generates an SQL OR condition string based on an associative array of comparisons.                                                                                       |
+| `sqlite_equal`                 | Generates an SQL equality comparison string.                                                                                                                             |
+| `sqlite_less_than`             | Generates an SQL less than comparison string.                                                                                                                            |
+| `sqlite_greater_than`          | Generates an SQL greater than comparison string.                                                                                                                         |
+| `sqlite_less_than_or_equal`    | Generates an SQL less than or equal comparison string.                                                                                                                   |
+| `sqlite_greater_than_or_equal` | Generates an SQL greater than or equal comparison string.                                                                                                                |
+| `sqlite_not_equal`             | Generates an SQL not equal comparison string.                                                                                                                            |
+| `sqlite_is`                    | Generates an SQLite IS comparison string based on the given comparison and value.                                                                                        |
+| `sqlite_is_not`                | Generates an SQLite IS NOT comparison string based on the given comparison and value.                                                                                    |
+| `sqlite_in`                    | Generates an SQLite IN comparison string based on the given comparison and values.                                                                                       |
+| `sqlite_not_in`                | Generates a SQLite "NOT IN" condition string.                                                                                                                            |
+| `sqlite_like`                  | Generates an SQLite LIKE comparison string based on the given comparison and pattern.                                                                                    |
+| `sqlite_glob`                  | Generates an SQLite GLOB comparison string based on the given comparison and pattern.                                                                                    |
+| `sqlite_match`                 | Generates an SQLite MATCH comparison string based on the given comparison and pattern.                                                                                   |
+| `sqlite_regexp`                | Generates an SQLite REGEXP comparison string based on the given comparison and pattern.                                                                                  |
+| `sqlite_and`                   | Generates a string of SQL conditions joined by 'AND' from an array of conditions.                                                                                        |
+| `sqlite_or`                    | Generates a string of SQL conditions joined by 'OR' from an array of conditions.                                                                                         |
+| `sqlite_not`                   | Generates a string representation of a SQL NOT condition for the given condition.                                                                                        |
+| `sqlite_between`               | Generates a string representation of a SQL BETWEEN condition.                                                                                                            |
+| `sqlite_concatenate`           | Concatenates two SQLite columns using the "\|\|" operator.                                                                                                               |
+| `sqlite_left_shift`            | Returns a string representation of the left shift operation on a given string value by a specified number of bits.                                                       |
+| `sqlite_right_shift`           | Returns the result of performing a right shift operation on a given string value by a specified number of bits.                                                          |
+| `sqlite_bitwise_and`           | Returns the bitwise AND of two strings.                                                                                                                                  |
+| `sqlite_bitwise_or`            | Returns the bitwise OR of two strings.                                                                                                                                   |
+| `sqlite_bitwise_not`           | Returns the bitwise NOT of a string.                                                                                                                                     |
+| `sqlite_add`                   | Adds two values together, returning a string representation of the sum.                                                                                                  |
+| `sqlite_subtract`              | Subtracts two values and returns the result as a string.                                                                                                                 |
+| `sqlite_multiply`              | Multiplies two values and returns the result as a string.                                                                                                                |
+| `sqlite_divide`                | Divides two values and returns the result as a string.                                                                                                                   |
+| `sqlite_modulus`               | Calculates the modulus of two values and returns the result as a string.                                                                                                 |
+| `sqlite_operators`             | Returns an array of SQLite operators.                                                                                                                                    |
+| `use_raw_value`                | Returns a raw value from the query builder.                                                                                                                              |
+| `use_raw_query`                | Executes a raw SQL query with parameters and optionally returns the query string.                                                                                        |
+| `use_raw_execute`              | Executes a raw SQL query with parameters without returning the query string.                                                                                             |
+| `explain`                      | Explains a SQL query by retrieving the execution plan from the database.                                                                                                 |
+| `str_remove_word_begin_with`   | Removes a specified keyword from the beginning of a SQL query string.                                                                                                    |
+| `remove_quotes`                | Removes single and double quotes from a given string.                                                                                                                    |
+| `is_has_sqlite_functions`      | Checks if a given SQL query contains any of the SQLite functions.                                                                                                        |
+| `is_has_sqlite_operators`      | Checks if a given SQL query contains any of the SQLite operators.                                                                                                        |
+| `sqlite_master_type`           | Retrieves information from the sqlite_master table based on the specified type(s).                                                                                       |
+| `has_potential_injection`      | Checks if a given input contains common SQL injection patterns.                                                                                                          |
+| `is_raw_value`                 | Checks if a value contains the "\|\>skipescape" flag indicating it should be treated as a raw value.                                                                     |
+| `is_nested_array`              | Checks if a given array is nested, meaning it contains sub-arrays.                                                                                                       |
+| `strim`                        | Trims whitespace from a string and replaces multiple spaces with a single space.                                                                                         |
