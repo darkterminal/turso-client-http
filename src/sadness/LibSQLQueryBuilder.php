@@ -157,6 +157,11 @@ class LibSQLQueryBuilder
     protected array $triggerStatements = [];
 
     /**
+     * @var bool Auto commit query builder
+     */
+    protected $isAutoCommitBuilder = true;
+
+    /**
      * LibSQLQueryBuilder constructor.
      *
      * @param LibSQL $db The database connection instance.
@@ -200,7 +205,7 @@ class LibSQLQueryBuilder
      */
     public function where(string $column, mixed $operator_or_value, mixed $value = null)
     {
-        $str_operator = !is_has_sqlite_operators($operator_or_value) ? '=' : $operator_or_value;
+        $str_operator = is_null($value) ? (!is_has_sqlite_operators($operator_or_value) ? '=' : $operator_or_value) : $operator_or_value;
         $this->conditions[] = "$column $str_operator ?";
         if (!is_null($value)) {
             $this->bindings[] = $value;
@@ -798,12 +803,15 @@ class LibSQLQueryBuilder
             throw new LibSQLError("Process rejected, your input is not safe", "ERR_BINDINGS");
         }
 
-        $this->reset();
-
         return $sql;
     }
 
-    public function getQueryString()
+    public function autoCommitBuilder(bool $commit = true)
+    {
+        $this->isAutoCommitBuilder = $commit;
+    }
+
+    public function getQueryString(): string
     {
         $mainQuery = $this->getQuery();
 
@@ -842,7 +850,9 @@ class LibSQLQueryBuilder
 
         $queryString = $this->replacePlaceholders($mainQuery, $this->bindings);
 
-        $this->reset();
+        if ($this->isAutoCommitBuilder) {
+            $this->reset();
+        }
 
         return $queryString;
     }
@@ -935,6 +945,10 @@ class LibSQLQueryBuilder
      */
     public function insert(array $data, bool $getQueryString = false)
     {
+        if (is_nested_array($data)) {
+            throw new LibSQLError("You can't insert nested arrays. Use insertBatch method if you want to used multiple rows", "ERR_BINDINGS");
+        }
+
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         $bindings = array_values($data);
@@ -1007,6 +1021,7 @@ class LibSQLQueryBuilder
      * @param string $from The name of the source table.
      * @param string $to The name of the destination table.
      * @param array|string $columns The columns to copy. Default is '*' (all columns).
+     * @param bool $getQueryString The sql generate query string
      * @return int|string total row affected or generated query string.
      */
     public function copyTable(string $from, string $to, array|string $columns = '*', bool $getQueryString = false)
@@ -1327,7 +1342,7 @@ class LibSQLQueryBuilder
             $queries = array_map(function ($query) {
                 return $this->replacePlaceholders($query, []);
             }, $queries);
-            $queries = "BEGIN TRANSACTION;" . PHP_EOL . implode(";" . PHP_EOL, $queries) . PHP_EOL . "COMMIT;";
+            $queries = "BEGIN TRANSACTION;" . PHP_EOL . implode(";" . PHP_EOL, $queries) . ";" . PHP_EOL . "COMMIT;";
             return $queries;
         }
 
@@ -1343,6 +1358,43 @@ class LibSQLQueryBuilder
             error_log($th->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Executes a raw SQL query and returns the result as an associative array.
+     *
+     * @param string $query The SQL query to execute.
+     * @param array $params The parameters to bind to the query.
+     * @return array The result of the query as an associative array.
+     */
+    public function queryRaw(string $query, array $params)
+    {
+        $results = $this->db->query($query, $params)->fetchArray(LibSQL::LIBSQL_ASSOC);
+        return $results;
+    }
+
+    /**
+     * Executes a raw SQL query with the given parameters and returns the result.
+     *
+     * @param string $query The SQL query to execute.
+     * @param array $params The parameters to bind to the query.
+     * @return mixed The result of the query execution.
+     */
+    public function executeRaw(string $query, array $params)
+    {
+        $results = $this->db->execute($query, $params);
+        return $results;
+    }
+
+    /**
+     * Retrieves all tables from the SQLite database.
+     *
+     * @return array An array of tables, each represented as an associative array with 'type', 'name', 'tbl_name', 'rootpage', 'sql' keys.
+     */
+    public function getAllTables()
+    {
+        $tables = sqlite_master_type('table');
+        return $tables;
     }
 
     /**
@@ -1370,9 +1422,7 @@ class LibSQLQueryBuilder
             if (!empty($tables)) {
                 $queries = [];
                 foreach ($tables as $table) {
-                    if ($table['type'] === 'table') {
-                        $queries[] = "DROP TABLE '{$table['name']}'";
-                    }
+                    $this->truncateTable($table['name']);
 
                     if ($table['type'] === 'index') {
                         $queries[] = "DROP INDEX '{$table['name']}'";
@@ -1381,8 +1431,26 @@ class LibSQLQueryBuilder
                     if ($table['type'] === 'trigger') {
                         $queries[] = "DROP TRIGGER '{$table['name']}'";
                     }
+
+                    if ($table['type'] === 'table') {
+                        $queries[] = "DROP TABLE '{$table['name']}'";
+                    }
                 }
+                array_unshift($queries, 'PRAGMA foreign_keys=OFF');
+                array_push($queries, 'PRAGMA foreign_keys=OFF');
                 $this->db->executeBatch($queries);
+
+                if (!empty($this->getAllTables())) {
+                    $tables = $this->getAllTables();
+                    foreach ($tables as $table) {
+                        if ($table['name'] === 'sqlite_sequence') {
+                            $this->truncateTable($table['name']);
+                        } else {
+                            $this->dropTable($table['name']);
+                        }
+                    }
+                }
+
                 return true;
             }
 
@@ -1499,18 +1567,46 @@ class LibSQLQueryBuilder
         return $allIndexes;
     }
 
-    public function createIndex(string $name, string $table, string|array $columns)
+    /**
+     * Creates an index on a specified table.
+     *
+     * @param string $name The name of the index.
+     * @param string $table The name of the table to create the index on.
+     * @param string|array $columns The column(s) to include in the index. Can be a string or an array of strings.
+     * @param bool $getQueryString If true, returns the SQL query string instead of executing it.
+     * @return mixed The result of the executed SQL query or the SQL query string.
+     */
+    public function createIndex(string $name, string $table, string|array $columns, bool $getQueryString = false)
     {
         $columns = is_array($columns) ? implode(', ', $columns) : $columns;
         $sql = "CREATE INDEX {$name} ON {$table} ({$columns})";
-        return $sql;
+
+        if ($getQueryString) {
+            return $sql;
+        }
+
+        return $this->db->execute($sql);
     }
 
-    public function createUniqueIndex(string $name, string $table, string|array $columns)
+    /**
+     * Creates a unique index on a specified table.
+     *
+     * @param string $name The name of the index.
+     * @param string $table The name of the table to create the index on.
+     * @param string|array $columns The column(s) to include in the index. Can be a string or an array of strings.
+     * @param bool $getQueryString If true, returns the SQL query string instead of executing it.
+     * @return mixed The result of the executed SQL query or the SQL query string.
+     */
+    public function createUniqueIndex(string $name, string $table, string|array $columns, bool $getQueryString = false)
     {
         $columns = is_array($columns) ? implode(', ', $columns) : $columns;
         $sql = "CREATE UNIQUE INDEX {$name} ON {$table} ({$columns})";
-        return $sql;
+
+        if ($getQueryString) {
+            return $sql;
+        }
+
+        return $this->db->execute($sql);
     }
 
     /**
@@ -1575,6 +1671,13 @@ class LibSQLQueryBuilder
         return $this;
     }
 
+    /**
+     * Set the trigger event.
+     *
+     * @param string $event The trigger event. Must be one of 'INSERT', 'UPDATE', or 'DELETE'.
+     * @throws \InvalidArgumentException If the trigger event is invalid.
+     * @return $this
+     */
     public function setTriggerEvent(string $event)
     {
         if (!in_array($event, ['INSERT', 'UPDATE', 'DELETE'])) {
@@ -1584,48 +1687,95 @@ class LibSQLQueryBuilder
         return $this;
     }
 
+    /**
+     * Set the table name for the trigger.
+     *
+     * @param string $tableName The name of the table.
+     * @return $this The current instance of the class.
+     */
     public function setTriggerTable(string $tableName)
     {
         $this->table = $tableName;
         return $this;
     }
 
+    /**
+     * Sets the trigger condition for the query builder.
+     *
+     * @param string $condition The condition to set for the trigger.
+     * @return $this The current instance of the query builder.
+     */
     public function setTriggerCondition(string $condition)
     {
         $this->triggerCondtion = $condition;
         return $this;
     }
 
+    /**
+     * Adds a trigger statement to the list of trigger statements.
+     *
+     * @param string $statement The trigger statement to add.
+     * @return $this The current instance of the class.
+     */
     public function addTriggerStatement(string $statement)
     {
         $this->triggerStatements[] = $statement;
         return $this;
     }
 
+    /**
+     * Adds a RAISE(ABORT) statement with the given message to the trigger statements list.
+     *
+     * @param string $message The message to be included in the RAISE(ABORT) statement.
+     * @return $this The current instance of the class.
+     */
     public function addRaiseAbort(string $message)
     {
         $this->triggerStatements[] = "SELECT RAISE(ABORT, '{$message}')";
         return $this;
     }
 
+    /**
+     * Adds a RAISE(ROLLBACK) statement with the given message to the trigger statements list.
+     *
+     * @param string $message The message to be included in the RAISE(ROLLBACK) statement.
+     * @return $this The current instance of the class.
+     */
     public function addRaiseRollback(string $message)
     {
         $this->triggerStatements[] = "SELECT RAISE(ROLLBACK, '{$message}')";
         return $this;
     }
 
+    /**
+     * Adds a RAISE FAIL statement with the given message to the triggerStatements array.
+     *
+     * @param string $message The message to be included in the RAISE FAIL statement.
+     * @return $this Returns the current object for method chaining.
+     */
     public function addRaiseFail(string $message)
     {
         $this->triggerStatements[] = "SELECT RAISE(FAIL, '{$message}')";
         return $this;
     }
 
+    /**
+     * Adds a RAISE(IGNORE) statement to the trigger statements list.
+     *
+     * @return $this The current instance of the class.
+     */
     public function addRaiseIgnore()
     {
         $this->triggerStatements[] = "SELECT RAISE(IGNORE)";
         return $this;
     }
 
+    /**
+     * Generates the SQL statement for creating a trigger.
+     *
+     * @throws InvalidArgumentException if any of the required trigger components are missing.
+     * @return string The SQL statement for creating the trigger.
+     */
     public function getTriggerSQL()
     {
         if (!$this->triggerName || !$this->triggerTime || !$this->triggerEvent || !$this->table || empty($this->triggerStatements)) {
@@ -1649,6 +1799,12 @@ class LibSQLQueryBuilder
         return $sql;
     }
 
+    /**
+     * Creates a trigger in the database using the provided trigger SQL statement.
+     *
+     * @throws \Throwable if there is an error executing the trigger SQL statement.
+     * @return bool Returns true if the trigger is successfully created, false otherwise.
+     */
     public function createTrigger()
     {
         try {
@@ -1693,7 +1849,7 @@ class LibSQLQueryBuilder
      */
     public function rawValue(string $string)
     {
-        return "{$string}|>skipescape";
+        return "|>rawValue$string|>rawValue";
     }
 
     /**
@@ -1707,7 +1863,7 @@ class LibSQLQueryBuilder
         if (is_numeric($value)) {
             return $value;
         } elseif (is_string($value)) {
-            return SQLite3::escapeString($value);
+            return "'" . SQLite3::escapeString($value) . "'";
         }
         return $value;
     }
@@ -1725,7 +1881,7 @@ class LibSQLQueryBuilder
             if (is_nested_array($replacement)) {
                 foreach ($replacement as $replace) {
                     foreach ($replace as $value) {
-                        $escapedValue = strpos($value, '|>skipescape') ? remove_quotes($value) : (is_string($value) ? $this->escapeString($value) : $value);
+                        $escapedValue = $this->escapeString($value);
                         $query = preg_replace('/\?/', $escapedValue, $query, 1);
                     }
                 }
@@ -1735,7 +1891,7 @@ class LibSQLQueryBuilder
                 }
 
                 foreach ($replacement as $value) {
-                    $escapedValue = strpos($value, '|>skipescape') ? remove_quotes($value) : (is_string($value) ? $this->escapeString($value) : $value);
+                    $escapedValue = $this->escapeString($value);
                     $query = preg_replace('/\?/', $escapedValue, $query, 1);
                 }
             }
@@ -1746,7 +1902,11 @@ class LibSQLQueryBuilder
             throw new InvalidArgumentException('Replacement must be a string or an array of strings.');
         }
 
-        return remove_quotes($query);
+        if (is_raw_value($query)) {
+            return remove_quotes($query);
+        }
+
+        return $query;
     }
 
     /**
