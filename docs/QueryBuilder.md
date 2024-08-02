@@ -431,7 +431,7 @@ $builder->table('tracks')
         "title",
         "SUM(Milliseconds) AS length",
     ])
-    ->join('albums', 'albums.AlbumId', 'tracks.AlbumId')
+    ->join('albums', 'albums.AlbumId', '=', 'tracks.AlbumId')
     ->groupBy('tracks.AlbumId')
     ->having('length > 60000000')
     ->get();
@@ -890,7 +890,7 @@ WHERE Name NOT LIKE '%Santana%';
 **Delete All Rows from Table**
 
 ```php
-$builder->table('artists_backup');
+$builder->table('artists_backup')->delete();
 ```
 
 equal to
@@ -975,6 +975,24 @@ VALUES('The Catcher in the Rye', '9780316769488', '1951-07-16')
 RETURNING title, isbn;
 ```
 
+## Using UPDATE RETURN
+
+```php
+$builder->updateReturn('book_lists', [
+    'isbn' => '0141439512'
+], sqlite_equal('id', 1));
+```
+
+equal to
+
+```sql
+UPDATE book_lists
+SET
+  isbn = '0141439512'
+WHERE
+  id = 1 RETURNING *;
+```
+
 ## Using TRANSACTION
 
 The `true` value in each operation builder will return Generated SQL.
@@ -1037,9 +1055,9 @@ $queryView = $builder->table('tracks')
         'media_types.Name AS media',
         'genres.Name AS genres'
     ])
-    ->join('albums', 'Albums.AlbumId', '=', $builder->rawValue('tracks.AlbumId'))
-    ->join('media_types', 'media_types.MediaTypeId', '=', $builder->rawValue('tracks.MediaTypeId'))
-    ->join('genres', 'genres.GenreId', '=', $builder->rawValue('tracks.GenreId'))
+    ->join('albums', 'Albums.AlbumId', '=', 'tracks.AlbumId')
+    ->join('media_types', 'media_types.MediaTypeId', '=', 'tracks.MediaTypeId')
+    ->join('genres', 'genres.GenreId', '=', 'tracks.GenreId')
     ->getQueryString();
 
 $builder->createView('v_tracks')
@@ -1069,8 +1087,8 @@ FROM
 ```php
 $queryView = $builder->table('tracks')
     ->select([
-        $builder->rawValue('albums.title AS AlbumTitle'),
-        $builder->rawValue('SUM(milliseconds) / 60000 AS Minutes')
+        'albums.title AS AlbumTitle',
+        'SUM(milliseconds) / 60000 AS Minutes'
     ])
     ->joinUsing('albums', 'AlbumId')
     ->groupBy('AlbumTitle')
