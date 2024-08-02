@@ -2,6 +2,7 @@
 
 namespace Darkterminal\TursoHttp\core\Http;
 
+use Darkterminal\TursoHttp\core\LibSQLError;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 
@@ -44,6 +45,11 @@ class LibSQLStatement
     {
         $this->parameters = $parameters;
         $res = $this->db->getConnection()->prepareRequest($this->sql, $parameters)->executeRequest()->get();
+
+        if (!is_array($res)) {
+            throw new LibSQLError("Something wen't wrong", "BAD_NETWORK_CONNECTION");
+        }
+
         $this->setResults($res);
         $result = Utils::removeCloseResponses($res['results']);
         return $result['affected_row_count'];
@@ -60,6 +66,11 @@ class LibSQLStatement
     {
         $this->parameters = $parameters;
         $results = $this->db->getConnection()->prepareRequest($this->sql, $parameters)->executeRequest()->get();
+
+        if (!is_array($results)) {
+            throw new LibSQLError("Something wen't wrong", "BAD_NETWORK_CONNECTION");
+        }
+
         $this->setResults($results);
         return new LibSQLResult($results);
     }
