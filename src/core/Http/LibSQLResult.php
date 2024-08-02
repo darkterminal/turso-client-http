@@ -186,7 +186,7 @@ class LibSQLResult
 
     private function isValidDateTime($dateString, $format = 'Y-m-d H:i:s')
     {
-        $dateTime = DateTime::createFromFormat($format, $dateString);
+        $dateTime = DateTime::createFromFormat($format, $dateString ?? date($format));
         return $dateTime && $dateTime->format($format) === $dateString;
     }
 }
