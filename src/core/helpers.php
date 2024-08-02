@@ -1177,8 +1177,25 @@ if (!function_exists('remove_quotes')) {
     function remove_quotes(string $string)
     {
         foreach (sqlite_functions() as $function) {
-            if (preg_match("/^$function\(/i", $string)) {
-                return str_replace('|>rawValue', '', $string);
+            if (stripos(strtolower($string), strtolower($function)) !== false || stripos($string, $function) !== false) {
+                $string = str_replace('|>rawValue', '', $string);
+                $pattern = '/(?<!\w)' . preg_quote($function, '/') . '(?!\w)/i';
+                $string = preg_replace_callback($pattern, function ($matches) use ($function) {
+                    return $function;
+                }, $string);
+
+                $pattern = '/\'(\w+)\s*\(\s*\'(.*?)\'\s*\)\s*\'|\"(\w+)\s*\(\s*\"(.*?)\"\s*\)\"/';
+                $string = preg_replace_callback($pattern, function ($matches) {
+                    if (!empty($matches[1])) {
+                        return $matches[1] . '(' . $matches[2] . ')';
+                    }
+                    if (!empty($matches[3])) {
+                        return $matches[3] . '(' . $matches[4] . ')';
+                    }
+                    return '';
+                }, $string);
+
+                return $string;
             }
         }
 
@@ -1221,7 +1238,7 @@ if (!function_exists('is_has_sqlite_functions')) {
             }
         } else {
             foreach (sqlite_functions() as $function) {
-                if (preg_match("/^$function\(/i", $sql)) {
+                if (stripos(strtolower($sql), strtolower($function)) !== false || stripos($sql, $function) !== false) {
                     return true;
                 }
             }
