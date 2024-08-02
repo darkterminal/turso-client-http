@@ -12,6 +12,40 @@ $authToken = getenv('DB_TOKEN');
 $db = new LibSQL("dbname=$dbname&authToken=$authToken");
 $builder = new LibSQLQueryBuilder($db);
 
+uses()->beforeAll(function () use ($db, $builder) {
+    $builder->dropAllTables();
+
+    $directory = getcwd() . '/tests/_files/database';
+    $pattern = '/\.sql$/';
+
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
+    $regexIterator = new RegexIterator($iterator, $pattern, RegexIterator::MATCH );
+
+    $samples = [];
+    foreach ($regexIterator as $file) {
+        $samples[] = $file->getPathname();
+    }
+
+    $createTables = $samples[0];
+    array_shift($samples);
+
+    $createTableQueries = array_map(function ($query) {
+        return trim($query);
+    }, explode('--##', file_get_contents($createTables)));
+
+    foreach ($createTableQueries as $query) {
+        $db->execute($query);
+    }
+
+    foreach ($samples as $sample) {
+        $db->executeBatch([
+            'PRAGMA foreign_keys=OFF',
+            file_get_contents($sample),
+            'PRAGMA foreign_keys=ON'
+        ]);
+    }
+})->in('Feature');
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -23,12 +57,28 @@ $builder = new LibSQLQueryBuilder($db);
 |
 */
 
-uses()->beforeEach(function () use ($dbname, $authToken, $db, $builder) {
-    test()->dbname = $dbname;
-    test()->authToken = $authToken;
-    test()->db = $db;
-    test()->builder = $builder;
-})->in('Feature');
+uses()
+    ->beforeEach(function () use ($dbname, $authToken, $db, $builder) {
+        test()->dbname = $dbname;
+        test()->authToken = $authToken;
+        test()->db = $db;
+        test()->builder = $builder;
+    })
+    ->afterAll(function () use ($builder) {
+        $builder->dropAllTables();
+    })
+    ->in('Feature');
+
+uses()
+    ->beforeAll(function () use ($db) {
+        $db->executeBatch([
+            "CREATE TABLE artists_backup(artistid INTEGER PRIMARY KEY AUTOINCREMENT, name NVARCHAR)",
+            "INSERT INTO artists_backup SELECT artistid,name FROM artists"
+        ]);
+    })->afterAll(function () use ($builder) {
+        $builder->dropTable('artists_backup');
+    })
+    ->group('thatNeedsSampleTableWithData');
 
 /*
 |--------------------------------------------------------------------------
@@ -52,16 +102,13 @@ uses()->beforeEach(function () use ($dbname, $authToken, $db, $builder) {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-function createUserTable()
+function makeItOneLine($sql)
 {
-    test()->db->execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT)");
-}
-
-function dropTables(string $table)
-{
-    $result = test()->db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='$table'");
-    expect($result)->not->toBeEmpty();
-
-    test()->builder->dropTable($table);
+    // Remove line breaks and extra spaces
+    $oneLineSql = preg_replace('/\s+/', ' ', $sql);
+    // Remove spaces before and after parentheses
+    $oneLineSql = preg_replace('/\s*\(\s*/', '(', $oneLineSql);
+    $oneLineSql = preg_replace('/\s*\)\s*/', ')', $oneLineSql);
+    $oneLineSql = trim($oneLineSql);
+    return $oneLineSql;
 }
