@@ -65,9 +65,10 @@ if (!function_exists('sqlite_count')) {
      * @param string $column The name of the column to count. Defaults to '*' to count all rows.
      * @return string The SQL expression for counting the rows or occurrences of the column.
      */
-    function sqlite_count(string $column = '*')
+    function sqlite_count(string $column = '*', string $alias = '')
     {
-        return "COUNT($column)";
+        $alias = $alias ?: "{$column}_count";
+        return "COUNT($column) AS $alias";
     }
 }
 
@@ -1033,6 +1034,66 @@ if (!function_exists('useQueryBuilder')) {
     }
 }
 
+if (!function_exists('libsql_version')) {
+    /**
+     * Retrieves the version of the LibSQL database.
+     *
+     * @return string The version of the LibSQL database.
+     */
+    function libsql_version()
+    {
+        return useDB()->version();
+    }
+}
+
+if (!function_exists('libsql_select_all_from')) {
+    /**
+     * Retrieves all records from the specified table using the LibSQLQueryBuilder.
+     *
+     * @param string $table The name of the table to retrieve records from.
+     * @return mixed The result of the query, which can be an array of records or a specific object.
+     */
+    function libsql_select_all_from(string $table)
+    {
+        return useQueryBuilder()->get($table);
+    }
+}
+
+if (!function_exists('libsql_select_from')) {
+    /**
+     * Retrieves records from the specified table using the LibSQLQueryBuilder.
+     *
+     * @param string $table The name of the table to retrieve records from.
+     * @param array|string $columns The columns to select from the table.
+     * @return mixed The result of the query, which can be an array of records or a specific object.
+     */
+    function libsql_select_from(string $table, array|string $columns)
+    {
+        return useQueryBuilder()->table($table)->select($columns)->get();
+    }
+}
+
+if (!function_exists('libsql_select_order')) {
+    /**
+     * Retrieves records from the specified table, ordered by a given field in a specified direction.
+     *
+     * @param string $table The name of the table to retrieve records from.
+     * @param array|string $columns The columns to select from the table.
+     * @param string $order The field to order the records by.
+     * @param string $direction The direction to order the records in. Defaults to 'asc'.
+     * @return mixed The result of the query, which can be an array of records or a specific object.
+     */
+    function libsql_select_order(string $table, array|string $columns, string $order, string $direction = 'asc')
+    {
+        $direction = !in_array($direction, ['asc', 'desc']) ? 'asc' : 'desc';
+        return useQueryBuilder()
+            ->table($table)
+            ->select($columns)
+            ->orderBy($order, $direction)
+            ->get();
+    }
+}
+
 if (!function_exists('use_raw_value')) {
     /**
      * Returns a raw value from the query builder.
@@ -1052,7 +1113,7 @@ if (!function_exists('use_raw_query')) {
     {
         $db = useDB();
         $prepare = $db->prepare($query);
-        $results = $prepare->query($params)->fetchArray();
+        $results = $prepare->query($params)->fetchArray($return);
 
         return $results;
     }
@@ -1117,12 +1178,29 @@ if (!function_exists('remove_quotes')) {
     {
         foreach (sqlite_functions() as $function) {
             if (preg_match("/^$function\(/i", $string)) {
-                return str_replace('|>skipescape', '', $string);
+                return str_replace('|>rawValue', '', $string);
             }
         }
 
+        if (strpos($string, "''") !== false) {
+            $query = str_replace("''", "'", $string);
+            $query = str_replace('|>rawValue', '', $query);
+            if (preg_match("/= (.*)/", $query, $matches)) {
+                $value = trim($matches[1]);
+
+                if (preg_match("/^'(.*)'$/", $value, $quoteMatches) || preg_match('/^"(.*)"$/', $value, $quoteMatches)) {
+                    $value = $quoteMatches[1];
+                }
+
+                $updatedQuery = preg_replace("/= .*/", "= $value", $query);
+                return $updatedQuery;
+            }
+            return $query;
+        }
+
         $value = str_replace(['\\"', "'"], '', $string);
-        return str_replace('|>skipescape', '', $value);
+        $value = str_replace('|>rawValue', '', $value);
+        return $value;
     }
 }
 
@@ -1230,22 +1308,22 @@ if (!function_exists('has_potential_injection')) {
 
 if (!function_exists('is_raw_value')) {
     /**
-     * Check if value contains "|>skipescape"
+     * Check if value contains "|>rawValue"
      *
      * @param string|array $value The value to check.
-     * @return bool Returns true if value contains "|>skipescape", false otherwise.
+     * @return bool Returns true if value contains "|>rawValue", false otherwise.
      */
     function is_raw_value(string|array $value)
     {
-        // Check if value contains "|>skipescape"
+        // Check if value contains "|>rawValue"
         if (is_array($value)) {
             foreach ($value as $val) {
-                if (strpos($val, '|>skipescape') !== false) {
+                if (strpos($val, '|>rawValue') !== false) {
                     return true;
                 }
             }
         } else {
-            return strpos($value, '|>skipescape') !== false;
+            return strpos($value, '|>rawValue') !== false;
         }
         return false;
     }
