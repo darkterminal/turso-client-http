@@ -1437,7 +1437,7 @@ class LibSQLQueryBuilder
                     }
                 }
                 array_unshift($queries, 'PRAGMA foreign_keys=OFF');
-                array_push($queries, 'PRAGMA foreign_keys=OFF');
+                array_push($queries, 'PRAGMA foreign_keys=ON');
                 $this->db->executeBatch($queries);
 
                 if (!empty($this->getAllTables())) {
