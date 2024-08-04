@@ -154,7 +154,8 @@ class LibSQLResult
         foreach ($tableRows as $row) {
             $i = 0;
             foreach ($row as $data) {
-                $values[] = $this->cast($this->columnType($i), $data['value']);
+                $type = $this->columnType($i) ?? $data['type'];
+                $values[] = $this->cast($type, $data['value']);
                 $i++;
             }
         }
