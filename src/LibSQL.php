@@ -49,9 +49,9 @@ class LibSQL
     /**
      * Turso Database Auth Token
      *
-     * @var string
+     * @var string|null
      */
-    protected string $authToken;
+    protected string|null $authToken;
 
     /**
      * @var Request The HTTP request handler.
@@ -76,8 +76,8 @@ class LibSQL
     public function __construct(string $dsn)
     {
         $database = Utils::parseDsn($dsn);
-        $this->baseURL = str_replace('libsql://', 'https://', $database['dbname']);
-        $this->authToken = $database['authToken'];
+        $this->baseURL = str_replace('libsql://', isLocalDev($database['dbname']) ? 'http://' : 'https://', $database['dbname']);
+        $this->authToken = $database['authToken'] ?? null;
         $this->http = new Request($this->baseURL, $this->authToken);
     }
 
