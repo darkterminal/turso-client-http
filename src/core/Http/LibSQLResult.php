@@ -16,6 +16,9 @@ class LibSQLResult
     protected array $results;
     protected array $cols;
     protected array $rows;
+    protected int $rows_read;
+    protected int $rows_written;
+    protected float $query_duration_ms;
 
     public string|null $baton;
 
@@ -26,6 +29,9 @@ class LibSQLResult
         $this->baton = $results['baton'];
         $this->base_url = $results['base_url'];
         $this->results = Utils::removeCloseResponses($results['results']);
+        $this->rows_read = $this->results['rows_read'];
+        $this->rows_written = $this->results['rows_written'];
+        $this->query_duration_ms = $this->results['query_duration_ms'];
         $this->cols = $this->results['cols'];
         $this->rows = $this->results['rows'];
     }
@@ -85,6 +91,23 @@ class LibSQLResult
         // 
     }
 
+    /**
+     * Retrieves the statistics of the result set.
+     *
+     * @return array An associative array containing the following keys:
+    *  - 'rows_read': The number of rows read from the result set.
+    *  - 'rows_written': The number of rows written to the result set.
+    *  - 'query_duration_ms': The duration of the query in milliseconds.
+     */
+    public function getStats()
+    {
+        return [
+            'rows_read' => $this->rows_read,
+            'rows_written' => $this->rows_written,
+            'query_duration_ms' => $this->query_duration_ms
+        ];
+    }
+
     // /**
     //  * Retrieves the name of a column by its index.
     //  *
@@ -134,7 +157,8 @@ class LibSQLResult
             $arr_vals = [];
             $i = 0;
             foreach ($vals as $val) {
-                if ($val['type'] === "null") $val['value'] = null;
+                if ($val['type'] === "null")
+                    $val['value'] = null;
                 $arr_vals[] = $this->cast($val['type'], $val['value']);
                 $i++;
             }
@@ -148,7 +172,7 @@ class LibSQLResult
         return $results;
     }
 
-    public function getNum($tableRows)
+    private function getNum($tableRows)
     {
         $values = [];
         foreach ($tableRows as $row) {
