@@ -583,10 +583,13 @@ WHERE albumid = (
 $builder->table('Customers c')
     ->select('CustomerId, FirstName, LastName, Company')
     ->exists(function ($builder) {
-        return $builder->table('Invoices')
+        $builder->autoCommitBuilder(false);
+        $query = $builder->table('Invoices')
             ->select('1')
             ->where('CustomerId', '=', $builder->rawValue('c.CustomerId'))
             ->getQueryString();
+        $builder->autoCommitBuilder(true);
+        return $query;
     })
     ->orderBy(['FirstName', 'LastName'])
     ->get();
@@ -622,9 +625,12 @@ ORDER BY
 $builder->table('Customers c')
     ->select('CustomerId, FirstName, LastName, Company')
     ->whereSubQuery('CustomerId', 'IN', function ($builder) {
-        return $builder->table('Invoices')
+        $builder->autoCommitBuilder(false);
+        $query = $builder->table('Invoices')
             ->select('CustomerId')
             ->getQueryString();
+        $builder->autoCommitBuilder(true);
+        return $query;
     })
     ->orderBy(['FirstName', 'LastName'])
     ->get();
@@ -657,10 +663,13 @@ ORDER BY
 ```php
 $builder->table('Artists a')
     ->notExists(function ($builder) {
-        return $builder->table('Albums')
+        $builder->autoCommitBuilder(false);
+        $query = $builder->table('Albums')
             ->select('1')
             ->where('ArtistId', '=', $builder->rawValue('a.ArtistId'))
             ->getQueryString();
+        $builder->autoCommitBuilder(true);
+        return $query;
     })
     ->orderBy('Name')
     ->get();
