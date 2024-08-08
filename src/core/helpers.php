@@ -1544,3 +1544,115 @@ if (!function_exists('strim')) {
         return trim($trimmed);
     }
 }
+
+if (!function_exists('is_expensive_query')) {
+    /**
+     * Checks if the given SQLite query plan indicates an expensive query.
+     *
+     * @param array $explainQueryPlanResults The results from EXPLAIN QUERY PLAN.
+     * @return bool True if the query is potentially expensive, false otherwise.
+     */
+    function is_expensive_query(array $explainQueryPlanResults): bool
+    {
+        // Regex patterns for identifying expensive query characteristics
+        $expensivePatterns = [
+            '/SCAN TABLE/i',                     // Full table scan
+            '/^SCAN \w+$/i',                     // Specific table scan
+            '/USING TEMP B-TREE/i',              // Temporary B-Tree used for sorting or joining
+            '/USING FILESORT/i',                 // Filesort operation
+            '/SUBQUERY/i',                       // Subqueries
+            '/CORRELATED SCALAR SUBQUERY/i',     // Specific type of subquery
+            '/SEARCH/i',                         // Searching an index
+            '/WITHOUT USING INDEX/i',            // Operation without index
+            '/TABLE/i',                          // Full table operations
+            '/NESTED LOOP/i'                     // Nested loop join
+        ];
+
+        foreach ($explainQueryPlanResults as $result) {
+            foreach ($expensivePatterns as $pattern) {
+                if (preg_match($pattern, $result['detail'])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('set_background')) {
+    /**
+     * Sets the background color of the input string based on the specified color.
+     *
+     * @param mixed $string The input string to set the background color for.
+     * @param string $color The color to apply to the background. Defaults to 'green'.
+     * @return mixed The input string with the specified background color applied.
+     */
+    function set_background($string, string $color = 'green')
+    {
+        $colors = [
+            'green' => function ($string) {
+                $boldGreenBgWhite = "\033[1;42;37m";
+                $reset = "\033[0m";
+                return "{$boldGreenBgWhite}{$string}{$reset}";
+            },
+            'red' => function ($string) {
+                $boldRedBgWhite = "\033[1;41;37m";
+                $reset = "\033[0m";
+                return "{$boldRedBgWhite}{$string}{$reset}";
+            },
+            'yellow' => function ($string) {
+                $boldYellowBgBlack = "\033[1;43;30m";
+                $reset = "\033[0m";
+                return "{$boldYellowBgBlack}{$string}{$reset}";
+            }
+        ];
+
+        if (php_sapi_name() === 'cli') {
+            if (isset($colors[$color])) {
+                return $colors[$color]($string);
+            } else {
+                return $colors['green']($string);
+            }
+        }
+
+        return $string;
+    }
+}
+
+if (!function_exists('set_bold')) {
+    /**
+     * Sets the given string to be displayed in bold text if running in a CLI environment.
+     *
+     * @param string $string The string to be displayed in bold text.
+     * @return string The string with the appropriate ANSI escape codes for bold text.
+     */
+    function set_bold($string)
+    {
+        $boldStart = "\033[1m";  // ANSI escape code for bold text
+        $reset = "\033[0m";      // ANSI escape code to reset text formatting
+
+        if (php_sapi_name() === 'cli') {
+            return "{$boldStart}{$string}{$reset}";
+        }
+
+        return $string;
+    }
+}
+
+if (function_exists('isLocalDev')) {
+    /**
+     * Checks if the given database is a local development database.
+     *
+     * @param string|array $database The database to check. Can be a string or an array.
+     *                              If an array, it should contain only one element.
+     * @return bool Returns true if the database is a local development database, false otherwise.
+     */
+    function isLocalDev(string|array $database)
+    {
+        if (is_array($database)) {
+            return count($database) === 1 && (preg_match('/127\.0\.0\.1|localhost/', $database[0]) || str_contains($database[0], 'http://'));
+        }
+        return preg_match('/127\.0\.0\.1|localhost/', $database) || str_contains($database, 'http://');
+    }
+}
