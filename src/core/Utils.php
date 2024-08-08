@@ -70,17 +70,20 @@ final class Utils
      *
      * @param string $method The HTTP request method (e.g., "GET", "POST").
      * @param string $url The URL to send the request to.
-     * @param string $authToken The token to send the request to.
+     * @param string|null $authToken The token to send the request to.
      * @param array $data Optional. The data to be sent with the request (used in POST and PUT requests).
      *
      * @return mixed Returns the decoded JSON response as an associative array on success, or a string containing the cURL error on failure.
      */
-    public static function makeRequest(string $method, string $url, string $authToken, array $data = []): string|array
+    public static function makeRequest(string $method, string $url, string|null $authToken, array $data = []): string|array
     {
         $headers = [
-            "Authorization: Bearer $authToken",
             "Content-Type: application/json",
         ];
+
+        if (!is_null($authToken)) {
+            $headers[] = "Authorization: Bearer $authToken";
+        }
 
         $curl = curl_init();
 
@@ -168,6 +171,11 @@ final class Utils
         $result = [];
         $components = preg_split('/[&;]/', $dsn);
 
+        if (isLocalDev($components)) {
+            $result['dbname'] = $components[0];
+            return $result;
+        }
+
         foreach ($components as $component) {
             $parts = explode('=', $component, 2);
             if (count($parts) === 2) {
@@ -202,7 +210,7 @@ final class Utils
             // Re-index the array
             $data = array_values($data);
         }
-        
+
         if ($data[0]['type'] === 'error') {
             throw new LibSQLError($data[0]['error']['message'], $data[0]['error']['code']);
         }
@@ -217,7 +225,8 @@ final class Utils
      */
     public static function isArrayAssoc(array $array): bool
     {
-        if ([] === $array) return false;
+        if ([] === $array)
+            return false;
         return array_keys($array) !== range(0, count($array) - 1);
     }
 }
