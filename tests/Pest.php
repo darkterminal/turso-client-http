@@ -7,6 +7,9 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
+// Disable strict query in test
+putenv("DB_STRICT_QUERY=false");
+
 $dbname = getenv('DB_URL');
 $authToken = getenv('DB_TOKEN');
 $db = new LibSQL("dbname=$dbname&authToken=$authToken");
