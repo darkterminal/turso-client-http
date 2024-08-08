@@ -159,7 +159,16 @@ class LibSQLQueryBuilder
     /**
      * @var bool Auto commit query builder
      */
-    protected $isAutoCommitBuilder = true;
+    protected bool $isAutoCommitBuilder = true;
+
+    /**
+     * @var array The statistics of query builder.
+     *            
+     * - rows_read: int The number of rows read from the database.
+     * - rows_written: int The number of rows written to the database.
+     * - query_duration_ms: int The duration of the query in milliseconds.
+     */
+    protected array $stats = [];
 
     /**
      * LibSQLQueryBuilder constructor.
@@ -857,14 +866,109 @@ class LibSQLQueryBuilder
         return $queryString;
     }
 
-    public function explain(string $query)
+    public function explain(string $query, bool $stringify = false)
+    {
+        // Extract table names from the query for indexing check
+        preg_match_all('/\bFROM\s+(\w+)|\bJOIN\s+(\w+)/i', $query, $matches);
+        $tables = array_unique(array_merge($matches[1], $matches[2]));
+
+        // Check if indexes exist for the relevant tables
+        $indexedTables = [];
+        $indexedTableColumns = [];
+        foreach ($tables as $table) {
+            if (!empty($table)) {
+                $indexes = $this->db->query("PRAGMA index_list('{$table}')")->fetchArray(LibSQL::LIBSQL_ASSOC);
+                $indexedTableColumns[$table] = $indexes;
+                if (!empty($indexes)) {
+                    $indexedTables[] = $table;
+                }
+            }
+        }
+
+        // If no indexes are found, notify the user
+        if (empty($indexedTables)) {
+            $message = "No indexes found for the tables in the query.\nConsider adding indexes to improve query performance.\n\n";
+            if ($stringify) {
+                return set_background($message, 'red') . $this->getExplainDetails($query, $stringify);
+            } else {
+                return [
+                    'indexes' => 'No indexes found',
+                    'details' => $this->getExplainDetails($query, $stringify)
+                ];
+            }
+        }
+
+        $message = set_background("  EXPLAIN QUERY PLAN \n\n");
+        $wrappedSql = wordwrap($query, 80, "\n  ");
+        $message .= "  $wrappedSql\n\n";
+
+        $message .= set_background("  YEP: The query looks good. \n\n");
+        foreach ($indexedTableColumns as $table => $rows) {
+            foreach ($rows as $index) {
+                $indexName = set_bold($index['name']);
+                $message .= wordwrap("  TABLE {$table}: Already have an index named -> {$indexName}\n", 90, "\n\t  ");
+            }
+        }
+
+        return $message;
+    }
+
+    private function getExplainDetails(string $query, bool $stringify = false)
     {
         $sql = <<<SQL
-        EXPLAIN QUERY PLAN
-        {$query}
-        SQL;
+EXPLAIN QUERY PLAN
+{$query}
+SQL;
 
-        return $this->db->query($sql)->fetchArray(LibSQL::LIBSQL_ASSOC);
+        $rawExplanations = $this->db->query($sql)->fetchArray(LibSQL::LIBSQL_ASSOC);
+
+        $explanations = [];
+        foreach ($rawExplanations as $index => $explain) {
+            $step = $index + 1;
+
+            // FIXME: Improved description matching
+            $description = match (true) {
+                strpos($explain['detail'], 'SEARCH') !== false => set_bold($explain['detail']) . " \n\t  Searches the table or index using the primary key or index. This can be efficient if the index is properly used.",
+                strpos($explain['detail'], 'NESTED LOOP') !== false => set_bold($explain['detail']) . " \n\t  Performs a nested loop join between tables. This can be slow with large datasets if not optimized.",
+                strpos($explain['detail'], 'SCAN') !== false || strpos($explain['detail'], 'SCAN TABLE') !== false => set_bold($explain['detail']) . " \n\t  Scans the entire table or index. This is potentially expensive and can impact query performance. Consider adding appropriate indexes to improve efficiency.",
+                strpos($explain['detail'], 'USING INDEX') !== false => set_bold($explain['detail']) . " \n\t  Uses an index to speed up the operation. This is generally efficient and preferable to scanning the whole table.",
+                strpos($explain['detail'], 'USING TEMP B-TREE') || strpos($explain['detail'], 'USE TEMP B-TREE') !== false => set_bold($explain['detail']) . " \n\t  Uses a temporary B-tree structure to sort or join results. This might be necessary for complex queries but could impact performance.",
+                strpos($explain['detail'], 'FUNCTION') !== false => set_bold($explain['detail']) . " \n\t  Executes a function as part of the query. Depending on the function, this may or may not be resource-intensive.",
+                strpos($explain['detail'], 'LIST SUBQUERY') !== false => set_bold($explain['detail']) . " \n\t  Executes a list subquery. This operation might be expensive if the list is large.",
+                strpos($explain['detail'], 'SUBQUERY') !== false && strpos($explain['detail'], 'CORRELATED SCALAR') === false => set_bold($explain['detail']) . " \n\t  Executes a subquery that is independent of the outer query. Subqueries can be costly depending on their complexity.",
+                strpos($explain['detail'], 'CORRELATED SCALAR SUBQUERY') !== false => set_bold($explain['detail']) . " \n\t  Executes a correlated scalar subquery, which can be particularly expensive as it's executed for each row of the outer query.",
+                strpos($explain['detail'], 'TABLE') !== false => set_bold($explain['detail']) . " \n\t  Uses the table directly. This is a general description and might imply various operations including scans.",
+                strpos($explain['detail'], 'EXISTS') !== false => set_bold($explain['detail']) . " \n\t  Checks if a row exists in a subquery. This can be efficient or costly depending on the subquery.",
+                strpos($explain['detail'], 'EXPLAIN') !== false => set_bold($explain['detail']) . " \n\t  Provides an explanation of the query plan itself. This is informational.",
+                strpos($explain['detail'], 'NOT EXISTS') !== false => set_bold($explain['detail']) . " \n\t  Checks if no row exists in a subquery. Performance depends on the subquery complexity.",
+                strpos($explain['detail'], 'NOT') !== false => set_bold($explain['detail']) . " \n\t  Performs a logical NOT operation. Generally not resource-intensive unless used in complex expressions.",
+                strpos($explain['detail'], 'NULL') !== false => set_bold($explain['detail']) . " \n\t  Checks for NULL values. This operation itself is not expensive but may affect performance in large datasets.",
+                default => "Unrecognized operation: " . $explain['detail'],
+            };
+
+            $explanations[] = [
+                'step' => $step,
+                'detail' => $explain['detail'],
+                'description' => $description
+            ];
+        }
+
+        if ($stringify) {
+            $message = set_background("  EXPLAIN QUERY PLAN \n\n");
+
+            $wrappedSql = wordwrap($query, 80, "\n  ");
+            $message .= "  $wrappedSql\n\n";
+
+            $message .= is_expensive_query($explanations) ? set_background("  WARNING: The query is potentially expensive. \n\n", 'yellow') : set_background("  YEP: The query looks good. \n\n");
+
+            foreach ($explanations as $explain) {
+                $message .= wordwrap("  Step {$explain['step']}: {$explain['description']}\n", 90, "\n\t  ");
+            }
+
+            return $message;
+        } else {
+            return $explanations;
+        }
     }
 
     /**
@@ -905,9 +1009,28 @@ class LibSQLQueryBuilder
             throw new LibSQLError("Process rejected, your input is not safe", "ERR_BINDINGS");
         }
 
-        $this->results = $this->db->prepare($mainQuery)
-            ->query($this->bindings)
-            ->fetchArray(LibSQL::LIBSQL_ASSOC);
+        $explanations = $this->explain($mainQuery, false);
+        $throwError = false;
+        if (is_expensive_query($explanations['details'])) {
+            $throwError = true;
+        }
+
+        if (getenv('DB_STRICT_QUERY') === 'true' && $throwError) {
+            $wrappedSql = wordwrap($mainQuery, 80, "\n  ");
+            $message = "  $wrappedSql\n\n";
+
+            $message .= set_background("  WARNING: The query is potentially expensive. \n\n", 'yellow');
+
+            foreach ($explanations['details'] as $explain) {
+                $message .= wordwrap("  Step {$explain['step']}: {$explain['description']}\n", 90, "\n\t  ");
+            }
+            throw new LibSQLError($message, "ERR_STRICT_QUERY");
+        }
+
+        $query = $this->db->prepare($mainQuery)
+            ->query($this->bindings);
+        $this->results = $query->fetchArray(LibSQL::LIBSQL_ASSOC);
+        $this->stats = $query->getStats();
 
         $this->reset();
 
