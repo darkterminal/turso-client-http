@@ -23,10 +23,10 @@ class Request implements Response
     protected $response;
 
     private string $database;
-    private string $token;
+    private string|null $token;
     protected array $bindings = [];
 
-    public function __construct(string $database, string $token)
+    public function __construct(string $database, string $token = null)
     {
         $this->requestData = [
             'requests' => [],
