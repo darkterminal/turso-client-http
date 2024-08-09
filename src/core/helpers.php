@@ -1640,7 +1640,7 @@ if (!function_exists('set_bold')) {
     }
 }
 
-if (function_exists('isLocalDev')) {
+if (!function_exists('isLocalDev')) {
     /**
      * Checks if the given database is a local development database.
      *
