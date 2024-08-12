@@ -170,11 +170,13 @@ class LibSQLBlueprint
      * Adds a unique column.
      *
      * @param string $name The name of the column.
+     * @param DataType $type The data type of the column.
      * @return LibSQLBlueprint The current blueprint instance.
      */
-    public function unique(string $name): LibSQLBlueprint
+    public function unique(string $name, DataType $type = DataType::TEXT): LibSQLBlueprint
     {
-        $this->columns[] = "$name TEXT UNIQUE";
+        $dataType = strtoupper($type->value);
+        $this->columns[] = "$name {$dataType} UNIQUE";
         return $this;
     }
 

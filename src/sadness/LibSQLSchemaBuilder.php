@@ -22,6 +22,11 @@ class LibSQLSchemaBuilder
      * @var array The array of SQL queries to be executed.
      */
     protected array $queries = [];
+    
+    /**
+     * @var array The array of table name.
+     */
+    protected array $tableName = [];
 
     /**
      * Creates a new LibSQLSchemaBuilder instance.
@@ -42,6 +47,7 @@ class LibSQLSchemaBuilder
      */
     public function create(string $table, callable $callback): LibSQLSchemaBuilder
     {
+        $this->tableName[] = $table;
         $blueprint = new LibSQLBlueprint($table);
         $callback($blueprint);
         $query = $blueprint->toSql();
@@ -76,6 +82,18 @@ class LibSQLSchemaBuilder
         $query = "DROP TABLE IF EXISTS $table";
         $this->queries[] = $query;
         return $this;
+    }
+
+    /**
+     * Retrieves the SQL query for a specific table or all queries if no table is provided.
+     *
+     * @param string|null $table The name of the table to retrieve the query for. If null, all queries will be returned.
+     * @return string The SQL query for the specified table or all queries.
+     */
+    public function toSql(string|null $table = null)
+    {
+        $index = array_search($table, $this->tableName);
+        return is_null($table) ? $this->queries : $this->queries[$index];
     }
 
     /**

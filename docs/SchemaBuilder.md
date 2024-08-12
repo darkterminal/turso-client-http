@@ -14,7 +14,7 @@ $schemaBuilder = new LibSQLSchemaBuilder($db);
 $schemaBuilder->create('users', function(LibSQLBlueprint $table) {
     $table->increments('id');
     $table->string('username')->notNull();
-    $table->string('email')->unique()->notNull();
+    $table->unique('email')->notNull();
     $table->string('password')->notNull();
     $table->timestamps();
 })->execute();
