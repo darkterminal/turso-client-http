@@ -154,11 +154,21 @@ class LibSQL
     /**
      * Execute a batch of queries.
      *
-     * @param array $queries The queries to execute.
+     * @param array|string $queries The queries to execute.
      * @throws LibSQLError If there is an error during execution.
      */
-    public function executeBatch(array $queries)
+    public function executeBatch(array|string $queries)
     {
+        if (!validate_sql_syntax($queries)) {
+            $message = "Invalid SQL syntax:\n";
+            foreach (validate_sql_syntax($queries, true) as $log) {
+                if (array_key_exists('error', $log)) {
+                    $message .= " - {$log['query']} {$log['error']}\n";
+                }
+            }
+            throw new LibSQLError($message, "EXECUTE_BATCH_ERROR");
+        }
+
         $trx = $this->transaction();
         try {
             foreach ($queries as $query) {
