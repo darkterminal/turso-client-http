@@ -1656,3 +1656,66 @@ if (!function_exists('isLocalDev')) {
         return preg_match('/127\.0\.0\.1|localhost/', $database) || str_contains($database, 'http://');
     }
 }
+
+if (!function_exists('validate_sql_syntax')) {
+    /**
+     * Validates the syntax of a given SQL query or array of queries.
+     *
+     * @param string|array $queryString The SQL query or array of queries to validate.
+     * @param bool $log Whether to return the validation results or a boolean indicating whether all queries are valid. Defaults to false.
+     * @throws Exception If an error occurs during query execution.
+     * @return array|bool An array of validation results if $log is true, or a boolean indicating whether all queries are valid if $log is false.
+     */
+    function validate_sql_syntax(string|array $queryString, bool $log = false)
+    {
+        if (!is_array($queryString)) {
+            $minified = str_replace(PHP_EOL, ' ', $queryString);
+            $queries = array_filter(array_map('trim', explode(';', $minified)));
+        }
+
+        $db = new SQLite3(':memory:');
+
+        $results = [];
+
+        foreach ($queries as $query) {
+            $query = trim($query);
+
+            if (empty($query)) {
+                continue;
+            }
+
+            try {
+                error_reporting(0);
+                $result = $db->exec($query);
+
+                if ($result === false) {
+                    $error = $db->lastErrorMsg();
+                    $results[] = [
+                        'query' => $query,
+                        'valid' => false,
+                        'error' => $error
+                    ];
+                } else {
+                    $results[] = [
+                        'query' => $query,
+                        'valid' => true
+                    ];
+                }
+            } catch (Exception $e) {
+                $results[] = [
+                    'query' => $query,
+                    'valid' => false,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        $db->close();
+
+        if ($log) {
+            return $results;
+        }
+
+        return array_key_exists('error', $results);
+    }
+}
