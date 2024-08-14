@@ -159,14 +159,9 @@ class LibSQL
      */
     public function executeBatch(array|string $queries)
     {
-        if (!validate_sql_syntax($queries)) {
-            $message = "Invalid SQL syntax:\n";
-            foreach (validate_sql_syntax($queries, true) as $log) {
-                if (array_key_exists('error', $log)) {
-                    $message .= " - {$log['query']} {$log['error']}\n";
-                }
-            }
-            throw new LibSQLError($message, "EXECUTE_BATCH_ERROR");
+        if (!is_array($queries)) {
+            $minified = str_replace(PHP_EOL, ' ', $queries);
+            $queries = array_filter(array_map('trim', explode(';', $minified)));
         }
 
         $trx = $this->transaction();

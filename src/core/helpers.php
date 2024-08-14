@@ -1671,6 +1671,8 @@ if (!function_exists('validate_sql_syntax')) {
         if (!is_array($queryString)) {
             $minified = str_replace(PHP_EOL, ' ', $queryString);
             $queries = array_filter(array_map('trim', explode(';', $minified)));
+        } else {
+            $queries = $queryString;
         }
 
         $db = new SQLite3(':memory:');
