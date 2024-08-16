@@ -229,4 +229,45 @@ final class Utils
             return false;
         return array_keys($array) !== range(0, count($array) - 1);
     }
+
+    /**
+     * Creates the directory and file for a given path if they don't exist.
+     *
+     * @param string $relativePath The relative path for the file.
+     * @param bool $createFile Whether to create the file if it doesn't exist.
+     * @return void
+     */
+    public static function createDirectoryAndFile(string $relativePath, bool $createFile = true): void
+    {
+        $directory = dirname($relativePath);
+
+        if (!is_dir($directory)) {
+            if (!mkdir($directory, 0755, true)) {
+                die("Failed to create directory: $directory");
+            }
+        }
+
+        if ($createFile && !file_exists($relativePath)) {
+            if (!touch($relativePath)) {
+                die("Failed to create file: $relativePath");
+            }
+        }
+    }
+
+    /**
+     * Extracts the user home directory from a given path by retrieving the first and second path segments.
+     *
+     * @return string|null The user home directory or null if the path is invalid.
+     */
+    public static function getUserHomeDirectory(): ?string
+    {
+        $normalizedPath = preg_replace('#/+#', '/', __DIR__);
+        $pathSegments = explode('/', trim($normalizedPath, '/'));
+
+        if (count($pathSegments) >= 2) {
+            return "/{$pathSegments[0]}/{$pathSegments[1]}";
+        }
+
+        return null;
+    }
 }

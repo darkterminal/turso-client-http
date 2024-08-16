@@ -5,6 +5,9 @@ namespace Darkterminal\TursoHttp\core;
 use Darkterminal\TursoHttp\core\Http\LibSQLTypes;
 use Darkterminal\TursoHttp\core\Response;
 use Darkterminal\TursoHttp\core\Utils;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
 
 class Request implements Response
 {
@@ -86,11 +89,14 @@ class Request implements Response
             throw new \Exception("Invalid request type. The valid types is only: execute and close", 1);
         }
 
-        if (empty($args)) {
-            $request = $type === 'close' ? ['type' => $type] : ['type' => $type, 'stmt' => ['sql' => $stmt]];
-        } else {
-            $request = $type === 'close' ? ['type' => $type] : ['type' => $type, 'stmt' => array_merge(['sql' => $stmt], $args)];
-        }
+        $request = $type === 'close'
+            ? ['type' => $type]
+            : [
+                'type' => $type,
+                'stmt' => empty($args)
+                    ? ['sql' => $stmt]
+                    : array_merge(['sql' => $stmt], $args),
+            ];
 
         $this->requestData['requests'][] = $request;
         return $this;
@@ -104,6 +110,7 @@ class Request implements Response
     public function executeRequest()
     {
         try {
+            $this->logPipeline();
             $url = "{$this->database}/v2/pipeline";
             $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
             $this->resetRequestData();
@@ -226,5 +233,17 @@ class Request implements Response
     private function resetRequestData(): void
     {
         $this->requestData = ['requests' => []];
+    }
+
+    private function logPipeline(): void
+    {
+        if (!empty(libsql_log_debug()) && libsql_log_debug() === 'true') {
+            $log_name = libsql_log_name() ?? 'libsql_debug';
+            $log_path = libsql_log_path() ?? Utils::getUserHomeDirectory() . DIRECTORY_SEPARATOR . '.turso-http' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . $log_name . '.log';
+            Utils::createDirectoryAndFile($log_path);
+            $log = new Logger($log_name);
+            $log->pushHandler(new StreamHandler($log_path, Level::Debug));
+            $log->debug('pipeline', $this->requestData);
+        }
     }
 }

@@ -1174,8 +1174,8 @@ if (!function_exists('useDB')) {
      */
     function useDB()
     {
-        $dbname = getenv('DB_URL');
-        $authToken = getenv('DB_TOKEN');
+        $dbname = libsql_url();
+        $authToken = libsql_token();
 
         return new LibSQL("dbname=$dbname&authToken=$authToken");
     }
@@ -1719,5 +1719,131 @@ if (!function_exists('validate_sql_syntax')) {
         }
 
         return array_key_exists('error', $results);
+    }
+}
+
+if (!function_exists('libsql_timezone')) {
+    function libsql_timezone()
+    {
+        $db_prefix = getenv('DB_TIMEZONE');
+        $turso_prefix = getenv('TURSO_TIMEZONE');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_url')) {
+    function libsql_url()
+    {
+        $db_prefix = getenv('DB_URL');
+        $turso_prefix = getenv('TURSO_URL');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_token')) {
+    function libsql_token()
+    {
+        $db_prefix = getenv('DB_TOKEN');
+        $turso_prefix = getenv('TURSO_TOKEN');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_strict_query')) {
+    function libsql_strict_query()
+    {
+        $db_prefix = getenv('DB_STRICT_QUERY');
+        $turso_prefix = getenv('TURSO_STRICT_QUERY');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_log_debug')) {
+    function libsql_log_debug()
+    {
+        $db_prefix = getenv('DB_LOG_DEBUG');
+        $turso_prefix = getenv('TURSO_LOG_DEBUG');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_log_name')) {
+    function libsql_log_name()
+    {
+        $db_prefix = getenv('DB_LOG_NAME');
+        $turso_prefix = getenv('TURSO_LOG_NAME');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('libsql_log_path')) {
+    function libsql_log_path()
+    {
+        $db_prefix = getenv('DB_LOG_PATH');
+        $turso_prefix = getenv('TURSO_LOG_PATH');
+
+        if (!empty($db_prefix)) {
+            return $db_prefix;
+        }
+
+        if (!empty($turso_prefix)) {
+            return $turso_prefix;
+        }
+
+        return null;
     }
 }

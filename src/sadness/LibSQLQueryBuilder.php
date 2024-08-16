@@ -1015,7 +1015,7 @@ SQL;
             $throwError = true;
         }
 
-        if (getenv('DB_STRICT_QUERY') === 'true' && $throwError) {
+        if (libsql_strict_query() === 'true' && $throwError) {
             $wrappedSql = wordwrap($mainQuery, 80, "\n  ");
             $message = "  $wrappedSql\n\n";
 

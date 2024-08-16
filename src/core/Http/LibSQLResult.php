@@ -194,7 +194,7 @@ class LibSQLResult
 
         $type = $this->isValidDateTime($value) ? 'datetime' : $type;
 
-        $timezoneString = getenv('DB_TIMEZONE');
+        $timezoneString = libsql_timezone();
         $timezone = empty($timezoneString) ? Timezone::fromString('UTC') : Timezone::fromString($timezoneString);
 
         $result = match (strtolower($type)) {
