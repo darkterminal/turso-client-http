@@ -114,8 +114,8 @@ class Request implements Response
     public function executeRequest()
     {
         try {
+            $this->runBeforeHook();
             $this->logPipeline();
-            call_user_func($this->before_hook);
             $url = "{$this->database}/v2/pipeline";
             $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
             $this->resetRequestData();
@@ -252,8 +252,22 @@ class Request implements Response
         }
     }
 
+    private function runBeforeHook()
+    {
+        if (!empty($this->before_hook)) {
+            call_user_func($this->before_hook);
+        }
+    }
+
+    private function runAfterHook()
+    {
+        if (!empty($this->after_hook)) {
+            call_user_func($this->after_hook);
+        }
+    }
+
     public function __destruct()
     {
-        call_user_func($this->after_hook);
+        $this->runAfterHook();
     }
 }

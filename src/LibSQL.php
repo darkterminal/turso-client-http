@@ -72,9 +72,12 @@ class LibSQL
      * LibSQL HTTP Instance
      *
      * @param string $dsn Your DSN config.
+     * @param array $options Your DSN config.
      */
     public function __construct(string $dsn, array $options = [])
     {
+        $this->checkOptions($options);
+
         $database = Utils::parseDsn($dsn);
         
         $this->baseURL = str_replace('libsql://', isLocalDev($database['dbname']) ? 'http://' : 'https://', $database['dbname']);
@@ -82,7 +85,7 @@ class LibSQL
         
         $before_hook = !empty($options) && !empty($options['before_hook']) ? $options['before_hook'] : null;
         $after_hook = !empty($options) && !empty($options['after_hook']) ? $options['after_hook'] : null;
-        
+
         $this->http = new Request($this->baseURL, $this->authToken, $before_hook, $after_hook);
     }
 
@@ -263,6 +266,14 @@ class LibSQL
             $this->affected_rows = $result['affected_row_count'];
         } else {
             $this->affected_rows = $results;
+        }
+    }
+
+    private function checkOptions(array $options): void
+    {
+        $is_closure = array_sum(array_map(fn($opt) => $opt instanceof \Closure, array_values($options)));
+        if (!empty($options) && (!Utils::isArrayAssoc($options) || $is_closure < 2)) {
+            throw new Exception('Error: The options value must be an associative array with key "before_hook" and "after_hook" with all "Closure" values');
         }
     }
 }
