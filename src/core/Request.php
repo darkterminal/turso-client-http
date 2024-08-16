@@ -28,8 +28,10 @@ class Request implements Response
     private string $database;
     private string|null $token;
     protected array $bindings = [];
+    private \Closure|null $before_hook = null;
+    private \Closure|null $after_hook = null;
 
-    public function __construct(string $database, string $token = null)
+    public function __construct(string $database, string $token = null, \Closure|null $before_hook, \Closure|null $after_hook)
     {
         $this->requestData = [
             'requests' => [],
@@ -37,6 +39,8 @@ class Request implements Response
         $this->response = [];
         $this->database = $database;
         $this->token = $token;
+        $this->before_hook = $before_hook;
+        $this->after_hook = $after_hook;
     }
 
     public function setBaton(string $baton): void
@@ -111,6 +115,7 @@ class Request implements Response
     {
         try {
             $this->logPipeline();
+            call_user_func($this->before_hook);
             $url = "{$this->database}/v2/pipeline";
             $this->response = Utils::makeRequest('POST', $url, $this->token, $this->requestData);
             $this->resetRequestData();
@@ -245,5 +250,10 @@ class Request implements Response
             $log->pushHandler(new StreamHandler($log_path, Level::Debug));
             $log->debug('pipeline', $this->requestData);
         }
+    }
+
+    public function __destruct()
+    {
+        call_user_func($this->after_hook);
     }
 }

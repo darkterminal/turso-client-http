@@ -1172,12 +1172,12 @@ if (!function_exists('useDB')) {
      *
      * @return LibSQL A new instance of LibSQL with the database connection details.
      */
-    function useDB()
+    function useDB(array $options = [])
     {
         $dbname = libsql_url();
         $authToken = libsql_token();
 
-        return new LibSQL("dbname=$dbname&authToken=$authToken");
+        return new LibSQL("dbname=$dbname&authToken=$authToken", $options);
     }
 }
 
@@ -1845,5 +1845,14 @@ if (!function_exists('libsql_log_path')) {
         }
 
         return null;
+    }
+}
+
+if (!function_exists('libsql_env')) {
+    function libsql_env(string|null $name = null)
+    {
+        $file_env = getcwd() . DIRECTORY_SEPARATOR . '.env';
+        $environment_variables = parse_ini_file($file_env);
+        return is_null($name) ? $environment_variables : $environment_variables[strtoupper($name)];
     }
 }

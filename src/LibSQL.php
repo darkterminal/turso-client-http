@@ -73,12 +73,17 @@ class LibSQL
      *
      * @param string $dsn Your DSN config.
      */
-    public function __construct(string $dsn)
+    public function __construct(string $dsn, array $options = [])
     {
         $database = Utils::parseDsn($dsn);
+        
         $this->baseURL = str_replace('libsql://', isLocalDev($database['dbname']) ? 'http://' : 'https://', $database['dbname']);
         $this->authToken = $database['authToken'] ?? null;
-        $this->http = new Request($this->baseURL, $this->authToken);
+        
+        $before_hook = !empty($options) && !empty($options['before_hook']) ? $options['before_hook'] : null;
+        $after_hook = !empty($options) && !empty($options['after_hook']) ? $options['after_hook'] : null;
+        
+        $this->http = new Request($this->baseURL, $this->authToken, $before_hook, $after_hook);
     }
 
     /**
