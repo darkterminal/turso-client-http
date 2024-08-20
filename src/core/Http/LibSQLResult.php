@@ -7,6 +7,7 @@ use Darkterminal\TursoHttp\core\Enums\Timezone;
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use DateTime;
+use Generator;
 
 /**
  * Represents the result of a LibSQL query.
@@ -72,6 +73,23 @@ class LibSQLResult
     }
 
     /**
+     * Returns an iterator that yields the result set as an array.
+     *
+     * @return Generator
+     */
+    public function lazyFetchArray()
+    {
+        $results = array_merge(
+            $this->getAssoc($this->cols, $this->rows),
+            $this->getNum($this->rows)
+        );
+
+        foreach ($results as $data) {
+            yield $data;
+        }
+    }
+
+    /**
      * Finalizes the result set and frees the associated resources.
      *
      * @return void
@@ -95,9 +113,9 @@ class LibSQLResult
      * Retrieves the statistics of the result set.
      *
      * @return array An associative array containing the following keys:
-    *  - 'rows_read': The number of rows read from the result set.
-    *  - 'rows_written': The number of rows written to the result set.
-    *  - 'query_duration_ms': The duration of the query in milliseconds.
+     *  - 'rows_read': The number of rows read from the result set.
+     *  - 'rows_written': The number of rows written to the result set.
+     *  - 'query_duration_ms': The duration of the query in milliseconds.
      */
     public function getStats()
     {
@@ -177,10 +195,12 @@ class LibSQLResult
         $values = [];
         foreach ($tableRows as $row) {
             $i = 0;
-            foreach ($row as $data) {
-                $type = $this->columnType($i) ?? $data['type'];
-                $values[] = $this->cast($type, $data['value']);
-                $i++;
+            if (isset($row['value'])) {
+                foreach ($row as $data) {
+                    $type = $this->columnType($i) ?? $data['type'];
+                    $values[] = $this->cast($type, $data['value']);
+                    $i++;
+                }
             }
         }
         return $values;
