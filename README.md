@@ -4,17 +4,11 @@ The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API (Only). It 
 
 ---
 
-<p align="center">
-  <a href="https://tur.so/dt" target="_blank">🚀 I'll give you 10% off Turso Scaler and Pro for 1 Year 🚀</a>
-</p>
-
----
-
 ## Requirements
 - Intention and Courage
 - Instinct as a Software Freestyle Engineer
 - Strong determination!
-- [Turso](https://tur.so/dt) Account (🚀 10% off Turso Scaler and Pro for 1 Year 🚀)
+- [Turso](https://turso.tech) Account
 - Don't forget to install [PHP](https://php.net) on your machine
 - A cup of coffee and the music you hate the most
 - Dancing (optional: if you are willing)
