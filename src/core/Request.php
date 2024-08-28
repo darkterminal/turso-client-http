@@ -240,6 +240,14 @@ class Request implements Response
         $this->requestData = ['requests' => []];
     }
 
+    /**
+     * Logs the pipeline request data if the libsql_log_debug parameter is set to true.
+     *
+     * The log file is located in the user's home directory in a .turso-http/logs directory.
+     * The log file name is the value of the libsql_log_name parameter, or 'libsql_debug.log' if not set.
+     *
+     * @return void
+     */
     private function logPipeline(): void
     {
         if (!empty(libsql_log_debug()) && libsql_log_debug() === 'true') {
@@ -252,6 +260,12 @@ class Request implements Response
         }
     }
 
+
+    /**
+     * Executes the before_hook function, if it exists and is not empty.
+     *
+     * @return void
+     */
     private function runBeforeHook()
     {
         if (!empty($this->before_hook)) {
@@ -259,6 +273,12 @@ class Request implements Response
         }
     }
 
+
+    /**
+     * Executes the after_hook function, if it exists and is not empty.
+     *
+     * @return void
+     */
     private function runAfterHook()
     {
         if (!empty($this->after_hook)) {
