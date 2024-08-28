@@ -71,11 +71,6 @@ $db->execute($create_table);
 ```php
 <?php
 
-/**
- * THIS IS POOR TESTING, IF YOU HAVE KNOWLEDGE ABOUT UNIT TESTING
- * PULL REQUEST ARE VERY WELCOME!
- */
-
 use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\sadness\LibSQLBlueprint;
@@ -122,11 +117,6 @@ try {
 ```php
 <?php
 
-/**
- * THIS IS POOR TESTING, IF YOU HAVE KNOWLEDGE ABOUT UNIT TESTING
- * PULL REQUEST ARE VERY WELCOME!
- */
-
 use Darkterminal\TursoHttp\LibSQL;
 
 require_once getcwd() . '/vendor/autoload.php';
@@ -151,11 +141,6 @@ $db->execute($query, [
 
 ```php
 <?php
-
-/**
- * THIS IS POOR TESTING, IF YOU HAVE KNOWLEDGE ABOUT UNIT TESTING
- * PULL REQUEST ARE VERY WELCOME!
- */
 
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
