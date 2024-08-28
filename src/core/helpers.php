@@ -4,8 +4,6 @@ use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
 
-require_once getcwd() . '/src/core/Repositories/endpoints.php';
-
 if (!function_exists('sqlite_functions')) {
     /**
      * Returns an array of SQLite functions.

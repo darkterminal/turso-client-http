@@ -2,6 +2,7 @@
 
 namespace Darkterminal\TursoHttp\core;
 
+use Darkterminal\TursoHttp\core\Repositories\Endpoints;
 use Exception;
 
 /**
@@ -23,7 +24,7 @@ final class Utils
      */
     public static function useAPI($type, $action): array
     {
-        $endpoints = endpoints($type, $action);
+        $endpoints = Endpoints::use($type, $action);
 
         if (empty($endpoints)) {
             throw new Exception("Endpoint configuration not found for $type/$action");
