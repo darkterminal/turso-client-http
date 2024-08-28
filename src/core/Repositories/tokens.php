@@ -1,20 +1,25 @@
 <?php
 
-return [
-    'list'      => [
-        'method'    => 'GET',
-        'url'       => $baseURL . '/auth/api-tokens'
-    ],
-    'create'    => [
-        'method'    => 'POST',
-        'url'       => $baseURL . '/auth/api-tokens/{tokenName}'
-    ],
-    'validate'  => [
-        'method'    => 'GET',
-        'url'       => $baseURL . '/auth/validate'
-    ],
-    'revoke'    => [
-        'method'    => 'DELETE',
-        'url'       => $baseURL . '/auth/api-tokens/{tokenName}'
-    ]
-];
+function tokenRepository($action): array
+{
+    $items = [
+        'list' => [
+            'method' => 'GET',
+            'url' => platform_api_url('/auth/api-tokens')
+        ],
+        'create' => [
+            'method' => 'POST',
+            'url' => platform_api_url('/auth/api-tokens/{tokenName}')
+        ],
+        'validate' => [
+            'method' => 'GET',
+            'url' => platform_api_url('/auth/validate')
+        ],
+        'revoke' => [
+            'method' => 'DELETE',
+            'url' => platform_api_url('/auth/api-tokens/{tokenName}')
+        ]
+    ];
+
+    return $items[$action] ?? [];
+}
