@@ -24,9 +24,8 @@ final class Utils
     public static function useAPI($type, $action): array
     {
         $endpoints = endpoints($type, $action);
-        
+
         if (empty($endpoints)) {
-            \http_response_code(403);
             throw new Exception("Endpoint configuration not found for $type/$action");
         }
 
@@ -44,7 +43,6 @@ final class Utils
     {
         $roles = ['owner', 'admin', 'member'];
         if (!in_array($roleName, $roles)) {
-            \http_response_code(403);
             throw new Exception("The role is not valid, role options: owner, admin, or member");
         }
     }
@@ -60,7 +58,6 @@ final class Utils
     {
         $roles = ['admin', 'member'];
         if (!in_array($roleName, $roles)) {
-            \http_response_code(403);
             throw new Exception("The role is not valid, role options: owner, admin, or member");
         }
     }
@@ -106,7 +103,7 @@ final class Utils
             return "cURL Error: $err";
         } else {
             return self::isJson($response) ? json_decode($response, true) : $response;
-        }        
+        }
     }
 
     /**
