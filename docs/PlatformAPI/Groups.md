@@ -1,85 +1,237 @@
 # Groups
 
-| Method                  | Parameters                                                            | Types                       | Description                                                                       |
-|-------------------------|-----------------------------------------------------------------------|-----------------------------|-----------------------------------------------------------------------------------|
-| `__construct`           | `$token`                                                      | `string`                    | Constructor for the `Groups` class, sets the API token.                           |
-| `list`                  | `$organizationName`                                            | `string`                    | List groups for a specific organization.                                          |
-| `create`                | `$organizationName`, `$groupName`, `$location = 'default'` | `string`, `string`, `string` | Create a new group with optional location parameter.                               |
-| `get_group`            | `$organizationName`, `$groupName`                  | `string`, `string`           | Get information about a specific group.                                            |
-| `delete`                | `$organizationName`, `$groupName`                  | `string`, `string`           | Delete a specific group.                                                           |
-| `transfer`             | `$organizationName`, `$oldGroupName`, `$newGroupName` | `string`, `string`, `string` | Transfer a specific group to another organization.                                 |
-| `add_location`         | `$organizationName`, `$groupName`, `$location_code` | `string`, `string`, `string` | Add a location to a specific group.                                                |
-| `delete_location`      | `$organizationName`, `$groupName`, `$location_code` | `string`, `string`, `string` | Delete a location from a specific group.                                           |
-| `update_version`       | `$organizationName`, `$groupName`                  | `string`, `string`           | Update the version of a specific group.                                           |
-| `create_token`         | `$organizationName`, `$groupName`, `$expiration = 'never'`, `$authorization = 'read-only'` | `string`, `string`, `string`, `string` | Create an access token for a specific group with optional parameters.              |
-| `invalidate_tokens`    | `$organizationName`, `$groupName`                  | `string`, `string`           | Invalidate access tokens for a specific group.                                    |
-| `get`                 | -                                                                   | `array`                     | Get the API response as an array.                                                  |
-| `toJSON`              | -                                                                   | `string` or `array` or `null`         | Get the API response as a JSON string, array, or null if not applicable.          |
+Groups Platform API - PHP Wrapper
 
-**Example usage**
+```php
+final class Groups implements Response
+{
+    public function __construct(string $token, string $organizationName) {}
+    public function list(): Groups {}
+    public function create(
+        string $groupName,
+        Location $location = Location::DEFAULT ,
+        Extension|array $extensions = Extension::ALL
+    ): Groups {}
+    public function get_group(string $groupName): Groups {}
+    public function delete(string $groupName): Groups {}
+    public function add_location(string $groupName, Location $location): Groups {}
+    public function delete_location(string $groupName, Location $location): Groups {}
+    public function transfer(string $oldGroupName, string $organization): Groups {}
+    public function unarchive(string $groupName): Groups {}
+    public function update_version(string $groupName): Groups {}
+    public function create_token(
+        string $groupName,
+        string $expiration = 'never',
+        Authorization $authorization = Authorization::FULL_ACCESS
+    ): Groups {}
+    public function invalidate_tokens(string $groupName): Groups {}
+    public function get(): array {}
+    public function toJSON(bool $pretty = false): string|array|null {}
+}
+```
+
+## Usage
+
+### Groups Platform API Instance
 
 ```php
 <?php
 
 // Assuming you have autoloading set up for your namespace
-
 use Darkterminal\TursoHttp\core\Platform\Groups;
 
-// Replace 'your_api_token', 'your_organization_name', and 'your_group_name' with actual values
 $apiToken = 'your_api_token';
 $organizationName = 'your_organization_name';
-$groupName = 'your_group_name';
 
-// Create an instance of Groups with the provided API token
-$groups = new Groups($apiToken);
-
-// Example: List groups for a specific organization
-$responseListGroups = $groups->list($organizationName)->get();
-print_r($responseListGroups);
-
-// Example: Create a new group
-$responseCreateGroup = $groups->create($organizationName, $groupName)->get();
-print_r($responseCreateGroup);
-
-// Example: Get information about a specific group
-$responseGetGroup = $groups->get_group($organizationName, $groupName)->get();
-print_r($responseGetGroup);
-
-// Example: Delete a specific group
-$responseDeleteGroup = $groups->delete($organizationName, $groupName)->get();
-print_r($responseDeleteGroup);
-
-// Example: Transfer a specific group to another organization
-$newOrganizationName = 'new_organization_name';
-$responseTransferGroup = $groups->transfer($organizationName, $groupName, $newOrganizationName)->get();
-print_r($responseTransferGroup);
-
-// Example: Add a location to a specific group
-$locationCode = 'location_code';
-$responseAddLocation = $groups->add_location($organizationName, $groupName, $locationCode)->get();
-print_r($responseAddLocation);
-
-// Example: Delete a location from a specific group
-$responseDeleteLocation = $groups->delete_location($organizationName, $groupName, $locationCode)->get();
-print_r($responseDeleteLocation);
-
-// Example: Update the version of a specific group
-$responseUpdateVersion = $groups->update_version($organizationName, $groupName)->get();
-print_r($responseUpdateVersion);
-
-// Example: Create an access token for a specific group
-$responseCreateToken = $groups->create_token($organizationName, $groupName)->get();
-print_r($responseCreateToken);
-
-// Example: Invalidate access tokens for a specific group
-$responseInvalidateTokens = $groups->invalidate_tokens($organizationName, $groupName)->get();
-print_r($responseInvalidateTokens);
-
-// Example: Get the API response as a JSON string or array
-$jsonResponse = $groups->toJSON();
-echo $jsonResponse;
-
-?>
+// Create an instance of Databases with the provided API token
+$groups = new Groups($organizationName, $apiToken);
 ```
+
+### List Groups
+
+Returns a list of groups belonging to the organization or user.
+
+```php
+$lists = $groups->list();
+
+// Return as an array
+print_r($lists->get());
+// Return as an object/json, pass true to pretty print
+echo $lists->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/list
+
+### Create Group
+
+Creates a new group for the organization or user.
+
+```php
+use Darkterminal\TursoHttp\core\Enums\Location;
+use Darkterminal\TursoHttp\core\Enums\Extension;
+
+// Create group with default closest region and all extension enables
+$create = $groups->create('punk');
+// Create group with selected region and all extension enables
+$create = $groups->create('punk', Location::AMS);
+// Create group with selected region and selected extensions enables
+$create = $groups->create('punk', Location::AMS, [
+    Extension::MATH,
+    Extension::TEXT
+]);
+
+// Return as an array
+print_r($create->get());
+// Return as an object/json, pass true to pretty print
+echo $create->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/create
+
+### Retrieve Group
+
+Returns a group belonging to the organization or user.
+
+```php
+$group = $groups->get_group('punk');
+
+// Return as an array
+print_r($group->get());
+// Return as an object/json, pass true to pretty print
+echo $group->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/retrieve
+
+### Delete Group
+
+Delete a group belonging to the organization or user.
+
+```php
+$delete = $groups->delete('punk');
+
+// Return as an array
+print_r($delete->get());
+// Return as an object/json, pass true to pretty print
+echo $delete->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/delete
+
+### Add Location to Group
+
+Adds a location to the specified group.
+
+```php
+use Darkterminal\TursoHttp\core\Enums\Location;
+
+$location = $groups->addLocation('punk', Location::AMS);
+
+// Return as an array
+print_r($location->get());
+// Return as an object/json, pass true to pretty print
+echo $location->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/add-location
+
+### Remove Location from Group
+
+Removes a location from the specified group.
+
+```php
+use Darkterminal\TursoHttp\core\Enums\Location;
+
+$location = $groups->deleteLocation('punk', Location::AMS);
+
+// Return as an array
+print_r($location->get());
+// Return as an object/json, pass true to pretty print
+echo $location->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/remove-location
+
+### Transfer Group
+
+Transfer a group to another organization that you own or a member of.
+
+```php
+$transfer = $groups->transfer('punk', 'universe');
+
+// Return as an array
+print_r($transfer->get());
+// Return as an object/json, pass true to pretty print
+echo $transfer->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/transfer
+
+### Unarchive Group
+
+Unarchive a group that has been archived due to inactivity.
+
+```php
+$unarchive = $groups->unarchive('punk');
+
+// Return as an array
+print_r($unarchive->get());
+// Return as an object/json, pass true to pretty print
+echo $unarchive->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/unarchive
+
+### Update Databases in a Group
+
+Updates all databases in the group to the latest libSQL version.
+
+```php
+$update = $groups->updateVersion('punk');
+
+// Return as an array
+print_r($update->get());
+// Return as an object/json, pass true to pretty print
+echo $update->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/update-database-versions
+
+### Create Group Auth Token
+
+Generates an authorization token for the specified group.
+
+```php
+use Darkterminal\TursoHttp\core\Enums\Authorization;
+
+// Create group token that never expired with full-access permission
+$update = $groups->createToken('punk');
+// Create group token that will be expired in 2 week 1 day 30 minutes with full-access permission
+$update = $groups->createToken('punk', '2w1d30m');
+// Create group token that will be expired in 2 week 1 day 30 minutes with read-only permission
+$update = $groups->createToken('punk', '2w1d30m', Authorization::READ_ONLY);
+
+// Return as an array
+print_r($update->get());
+// Return as an object/json, pass true to pretty print
+echo $update->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/create-token
+
+### Invalidate All Group Auth Tokens
+
+Invalidates all authorization tokens for the specified group.
+
+```php
+$update = $groups->invalidateTokens('punk');
+
+// Return as an array
+print_r($update->get());
+// Return as an object/json, pass true to pretty print
+echo $update->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/groups/invalidate-tokens
 
 > Turso Groups: https://docs.turso.tech/api-reference/groups
