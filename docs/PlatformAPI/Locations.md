@@ -1,41 +1,62 @@
-# Locations
+# Lcoations
 
-| Method                  | Parameters                                                            | Types                       | Description                                                                       |
-|-------------------------|-----------------------------------------------------------------------|-----------------------------|-----------------------------------------------------------------------------------|
-| `__construct`           | `$token`                                                      | `string`                    | Constructor for the `Locations` class, sets the API token.                         |
-| `get_locations`         | -                                                                     | -                           | Get a list of available locations.                                                |
-| `closest_region`        | -                                                                     | -                           | Get the closest region based on the user's location.                              |
-| `get`                   | -                                                                     | `array`                     | Get the API response as an array.                                                  |
-| `toJSON`                | -                                                                     | `string|array|null`         | Get the API response as a JSON string, array, or null if not applicable.          |
+Lcoations Platform API - PHP Wrapper
 
-**Example usage**
+```php
+final class Locations implements Response
+{
+    public function __construct(string $token) {}
+    public function getLocations(): Locations {}
+    public function closestRegion(): Locations {}
+    public function get(): array {}
+    public function toJSON(bool $pretty = false): string|array|null {}
+}
+```
+
+## Usage
+
+### Locations Platform API Instance
 
 ```php
 <?php
 
 // Assuming you have autoloading set up for your namespace
-
 use Darkterminal\TursoHttp\core\Platform\Locations;
 
-// Replace 'your_api_token' with the actual API token
 $apiToken = 'your_api_token';
 
-// Create an instance of Locations with the provided API token
+// Create an instance of Databases with the provided API token
 $locations = new Locations($apiToken);
-
-// Example: Get a list of available locations
-$responseGetLocations = $locations->get_locations()->get();
-print_r($responseGetLocations);
-
-// Example: Get the closest region based on the user's location
-$responseClosestRegion = $locations->closest_region()->get();
-print_r($responseClosestRegion);
-
-// Example: Get the API response as a JSON string or array
-$jsonResponse = $locations->toJSON();
-echo $jsonResponse;
-
-?>
 ```
+
+### List Locations
+
+Returns a list of locations where you can create or replicate databases.
+
+```php
+$locations = $locations->getLocations();
+
+// Return as an array
+print_r($locations->get());
+// Return as an object/json, pass true to pretty print
+echo $locations->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/locations/list
+
+### Closest Region
+
+Returns the closest region to the user’s location.
+
+```php
+$locations = $locations->closestRegion();
+
+// Return as an array
+print_r($locations->get());
+// Return as an object/json, pass true to pretty print
+echo $locations->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/locations/closest-region
 
 > Turso Locations: https://docs.turso.tech/api-reference/locations
