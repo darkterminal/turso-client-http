@@ -2,7 +2,7 @@
     "name": "darkterminal/turso-http",
     "description": "The TursoHTTP library is a PHP wrapper for Turso HTTP Database API",
     "license": "MIT",
-    "version": "v2.7.0",
+    "version": "v2.8.0",
     "autoload": {
         "psr-4": {
             "Darkterminal\\TursoHttp\\": "src/"
