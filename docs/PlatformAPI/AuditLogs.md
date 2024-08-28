@@ -1,41 +1,49 @@
-# Audit Logs
+# API Token
 
-| Method              | Parameters                                    | Types                     | Description                                                     |
-|---------------------|-----------------------------------------------|---------------------------|-----------------------------------------------------------------|
-| `__construct`       | `$token`                              | `string`                  | Constructor for the `AuditLogs` class, sets the API token.      |
-| `list_audit_logs`   | `$organizationName`, `$page_size`, `$page` | `string`, `int`, `int`    | List audit logs for a specific organization with pagination.    |
-| `get`               | -                                             | `array`                   | Get the API response as an array.                               |
-| `toJSON`            | -                                             | `string|array|null`       | Get the API response as a JSON string, array, or null if not applicable. |
+API Token Platform API - PHP Wrapper
 
-**Example Usage**
+```php
+final class AuditLogs implements Response
+{
+    public function __construct(string $token, string $organizationName) {}
+    public function list(): AuditLogs {}
+    public function get(): array {}
+    public function toJSON(bool $pretty = false): string|array|null {}
+}
+```
+
+## Usage
+
+### Invites Platform API Instance
 
 ```php
 <?php
 
 // Assuming you have autoloading set up for your namespace
-
 use Darkterminal\TursoHttp\core\Platform\AuditLogs;
 
-// Replace 'your_api_token' with the actual API token you have
 $apiToken = 'your_api_token';
+$organizationName = 'your_organization';
 
-// Replace 'your_organization_name', 10, and 1 with actual values
-$organizationName = 'your_organization_name';
-$page_size = 10;
-$page = 1;
-
-// Create an instance of AuditLogs with the provided API token
-$auditLogs = new AuditLogs($apiToken);
-
-// Example: List audit logs for a specific organization with pagination
-$responseListAuditLogs = $auditLogs->list_audit_logs($organizationName, $page_size, $page)->get();
-print_r($responseListAuditLogs);
-
-// Example: Get the API response as a JSON string or array
-$jsonResponse = $auditLogs->toJSON();
-echo $jsonResponse;
-
-?>
+// Create an instance of Databases with the provided API token
+$logs = new AuditLogs($apiToken, $organizationName);
 ```
+
+### List Audit Logs
+
+Return the audit logs for the given organization, ordered by the `created_at` field in descending order.
+
+```php
+$logs = $logs->list();
+// List 20 logs per page, page 1
+$logs = $logs->list(20, 1);
+
+// Return as an array
+print_r($logs->get());
+// Return as an object/json, pass true to pretty print
+echo $logs->toJSON(true) . PHP_EOL;
+```
+
+Ref: https://docs.turso.tech/api-reference/audit-logs/list
 
 > Turso Audit Logs: https://docs.turso.tech/api-reference/audit-logs
