@@ -1,12 +1,26 @@
 <?php
 
-$baseURL = 'https://api.turso.tech/v1';
+require_once getcwd() . '/src/core/Repositories/database.php';
+require_once getcwd() . '/src/core/Repositories/groups.php';
+require_once getcwd() . '/src/core/Repositories/organizations.php';
+require_once getcwd() . '/src/core/Repositories/members.php';
+require_once getcwd() . '/src/core/Repositories/invites.php';
+require_once getcwd() . '/src/core/Repositories/tokens.php';
+require_once getcwd() . '/src/core/Repositories/locations.php';
+require_once getcwd() . '/src/core/Repositories/audit_logs.php';
 
-return [
-    'tokens' => require_once 'tokens.php',
-    'databases' => require_once 'database.php',
-    'groups' => require_once 'groups.php',
-    'locations' => require_once 'locations.php',
-    'organizations' => require_once 'organizations.php',
-    'audit_logs' => require_once 'audit_logs.php'
-];
+function endpoints($type, $action): array
+{
+    $repositories = [
+        'tokens' => tokenRepository($action),
+        'databases' => databaseRepository($action),
+        'groups' => groupsRepository($action),
+        'locations' => locationRepository($action),
+        'organizations' => organizationsRepository($action),
+        'members' => membersRepository($action),
+        'invites' => invitesRepository($action),
+        'audit_logs' => auditLogsRepository()
+    ];
+
+    return $repositories[$type];
+}
