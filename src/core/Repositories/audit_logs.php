@@ -1,6 +1,9 @@
 <?php
 
-return [
-    'method'    => 'GET',
-    'url'       => $baseURL . '/organizations/{organizationName}/audit-logs'
-];
+function auditLogsRepository(): array
+{
+    return [
+        'method' => 'GET',
+        'url' => platform_api_url('/organizations/{organizationName}/audit-logs')
+    ];
+}
