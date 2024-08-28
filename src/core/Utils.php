@@ -23,14 +23,14 @@ final class Utils
      */
     public static function useAPI($type, $action): array
     {
-        $endpoints = require 'Repositories' . \DIRECTORY_SEPARATOR . 'endpoints.php';
-
-        if (isset($endpoints[$type][$action])) {
-            return $endpoints[$type][$action];
-        } else {
+        $endpoints = endpoints($type, $action);
+        
+        if (empty($endpoints)) {
             \http_response_code(403);
             throw new Exception("Endpoint configuration not found for $type/$action");
         }
+
+        return $endpoints;
     }
 
     /**
@@ -94,20 +94,19 @@ final class Utils
             CURLOPT_HTTPHEADER => $headers,
         ]);
 
-        if ($method === 'POST' || $method === 'PUT') {
+        if (($method === 'POST' || $method === 'PUT' || $method === 'PATCH') && !empty($data)) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
 
         $response = curl_exec($curl);
         $err = curl_error($curl);
-
         curl_close($curl);
 
         if ($err) {
             return "cURL Error: $err";
         } else {
             return self::isJson($response) ? json_decode($response, true) : $response;
-        }
+        }        
     }
 
     /**
@@ -188,6 +187,10 @@ final class Utils
 
     public static function isJson(string $string): bool
     {
+        if (function_exists('json_validate')) {
+            return json_validate($string);
+        }
+
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
     }
