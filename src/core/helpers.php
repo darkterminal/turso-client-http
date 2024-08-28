@@ -4,6 +4,8 @@ use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
 
+require_once getcwd() . '/src/core/Repositories/endpoints.php';
+
 if (!function_exists('sqlite_functions')) {
     /**
      * Returns an array of SQLite functions.
@@ -1854,5 +1856,19 @@ if (!function_exists('libsql_env')) {
         $file_env = getcwd() . DIRECTORY_SEPARATOR . '.env';
         $environment_variables = parse_ini_file($file_env);
         return is_null($name) ? $environment_variables : $environment_variables[strtoupper($name)];
+    }
+}
+
+if (!function_exists('platform_api_url')) {
+    /**
+     * Returns the base URL for the Turso API.
+     *
+     * @param string|null $path The path to append to the base URL.
+     * @return string The base URL for the Turso API.
+     */
+    function platform_api_url(string $path = null)
+    {
+        $baseUrl = 'https://api.turso.tech/v1';
+        return is_null($path) ? $baseUrl : "{$baseUrl}{$path}";
     }
 }
