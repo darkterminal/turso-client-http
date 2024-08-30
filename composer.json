@@ -1,6 +1,6 @@
 {
-    "name": "darkterminal/turso-client-php",
-    "description": "The Turso Client PHP library is a PHP wrapper for Turso HTTP Database API",
+    "name": "darkterminal/turso-client-http",
+    "description": "The Turso Client HTTP library is a PHP wrapper for Turso HTTP Database API",
     "license": "MIT",
     "version": "v2.9.2",
     "autoload": {
