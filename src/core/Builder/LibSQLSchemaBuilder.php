@@ -1,6 +1,6 @@
 <?php
 
-namespace Darkterminal\TursoHttp\sadness;
+namespace Darkterminal\TursoHttp\core\Builder;
 
 use Darkterminal\TursoHttp\LibSQL;
 
@@ -9,7 +9,7 @@ use Darkterminal\TursoHttp\LibSQL;
  *
  * A class to build and manage database schemas using the LibSQL database connection.
  *
- * @package Darkterminal\TursoHttp\sadness
+ * @package Darkterminal\TursoHttp\core\Builder
  */
 class LibSQLSchemaBuilder
 {

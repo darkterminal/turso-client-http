@@ -4,22 +4,18 @@ The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API (Only). It 
 
 ---
 
-<p align="center">
-  <a href="https://tur.so/dt" target="_blank">🚀 I'll give you 10% off Turso Scaler and Pro for 1 Year 🚀</a>
-</p>
-
----
-
 ## Requirements
+
 - Intention and Courage
 - Instinct as a Software Freestyle Engineer
 - Strong determination!
-- [Turso](https://tur.so/dt) Account (🚀 10% off Turso Scaler and Pro for 1 Year 🚀)
+- [Turso](https://tur.so/dt) Account
 - Don't forget to install [PHP](https://php.net) on your machine
 - A cup of coffee and the music you hate the most
 - Dancing (optional: if you are willing)
 
 ## Features
+
 - **[libSQL Native Extension](https://github.com/tursodatabase/turso-client-php)** like API Interface
 - Schema Builder
 - Query Builder
@@ -34,13 +30,17 @@ You can install the **TursoHTTP** library using Composer:
 composer require darkterminal/turso-http
 ```
 
-## Setting Up Timezone
+## Environment Variables
 
-Set the database display timezome in your `env` variable. See the list of timezones [here](https://www.php.net/manual/en/timezones.php)
-
-```env
-DB_TIMEZOME=Asia/Jakarta
-```
+| Variable Name                             | Value                              | Description                                                                   |
+| ----------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------- |
+| `DB_URL` or `TURSO_URL`                   | Your Turso database URL            | -                                                                             |
+| `DB_TOKEN` or `TURSO_TOKEN`               | Your Turso database TOKEN          | -                                                                             |
+| `DB_TIMEZONE` or `TURSO_TIMEZONE`         | `Asia/Jakarta`                     | See the list of timezones [here](https://www.php.net/manual/en/timezones.php) |
+| `DB_STRICT_QUERY` or `TURSO_STRICT_QUERY` | `true` / default: `false`          | Use strict query when using `explain` method in Query Builder                 |
+| `DB_LOG_DEBUG` or `TURSO_LOG_DEBUG`       | `true` / default: `false`          | Set Query logs to save all query activities into a log file                   |
+| `DB_LOG_NAME` or `TURSO_LOG_NAME`         | `libsql_debug`                     | Set Query channel name                                                        |
+| `DB_LOG_PATH` or `TURSO_LOG_PATH`         | `$HOME/.turso-http/logs/debug.log` | Log file location                                                             |
 
 ## Usage Example
 
@@ -57,8 +57,8 @@ echo $db->version() . PHP_EOL;
 
 $create_table = <<<SQL
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, 
-    name TEXT, 
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
     email TEXT
 )
 SQL;
@@ -73,8 +73,8 @@ $db->execute($create_table);
 
 use Darkterminal\TursoHttp\core\Enums\DataType;
 use Darkterminal\TursoHttp\LibSQL;
-use Darkterminal\TursoHttp\sadness\LibSQLBlueprint;
-use Darkterminal\TursoHttp\sadness\LibSQLSchemaBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLBlueprint;
+use Darkterminal\TursoHttp\core\Builder\LibSQLSchemaBuilder;
 
 require_once 'vendor/autoload.php';
 
@@ -143,7 +143,7 @@ $db->execute($query, [
 <?php
 
 use Darkterminal\TursoHttp\LibSQL;
-use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLQueryBuilder;
 
 require_once getcwd() . '/vendor/autoload.php';
 
@@ -159,17 +159,6 @@ $contacts = $sql->table('contacts')
 
 var_dump($contacts);
 ```
-
-## Turso Platform API - PHP
-
-Manage databases, replicas, and teams with the Turso Platform API using PHP.
-
-- [Quickstart](docs/PlatformAPI/README.md)
-- [API Tokens](docs/PlatformAPI/APITokens.md)
-- [Audit Logs](docs/PlatformAPI/AuditLogs.md)
-- [Databases](docs/PlatformAPI/Databases.md)
-- [Groups](docs/PlatformAPI/Groups.md)
-- [Locations](docs/PlatformAPI/Locations.md)
 
 ## License
 

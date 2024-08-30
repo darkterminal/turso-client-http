@@ -6,7 +6,7 @@
  */
 
 use Darkterminal\TursoHttp\LibSQL;
-use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLQueryBuilder;
 
 require_once getcwd() . '/vendor/autoload.php';
 

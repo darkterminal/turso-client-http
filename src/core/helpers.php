@@ -2,7 +2,7 @@
 
 use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
-use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLQueryBuilder;
 
 if (!function_exists('sqlite_functions')) {
     /**

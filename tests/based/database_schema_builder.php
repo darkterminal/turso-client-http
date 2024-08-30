@@ -7,8 +7,8 @@
 
 use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\core\Enums\DataType;
-use Darkterminal\TursoHttp\sadness\LibSQLBlueprint;
-use Darkterminal\TursoHttp\sadness\LibSQLSchemaBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLBlueprint;
+use Darkterminal\TursoHttp\core\Builder\LibSQLSchemaBuilder;
 
 require_once getcwd() . '/vendor/autoload.php';
 

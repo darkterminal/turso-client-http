@@ -1,7 +1,7 @@
 <?php
 
 use Darkterminal\TursoHttp\LibSQL;
-use Darkterminal\TursoHttp\sadness\LibSQLQueryBuilder;
+use Darkterminal\TursoHttp\core\Builder\LibSQLQueryBuilder;
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');

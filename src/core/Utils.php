@@ -2,6 +2,7 @@
 
 namespace Darkterminal\TursoHttp\core;
 
+use Darkterminal\TursoHttp\core\Enums\HttpResponse;
 use Darkterminal\TursoHttp\core\Repositories\Endpoints;
 use Exception;
 
@@ -12,57 +13,6 @@ use Exception;
  */
 final class Utils
 {
-    /**
-     * Get API endpoint configuration.
-     *
-     * @param string $type The type of the API.
-     * @param string $action The action to perform on the API.
-     *
-     * @return array The endpoint configuration for the specified type and action.
-     *
-     * @throws Exception Throws an exception with a 403 HTTP response code if the endpoint configuration is not found.
-     */
-    public static function useAPI($type, $action): array
-    {
-        $endpoints = Endpoints::use($type, $action);
-
-        if (empty($endpoints)) {
-            throw new Exception("Endpoint configuration not found for $type/$action");
-        }
-
-        return $endpoints;
-    }
-
-    /**
-     * Validate a member role.
-     *
-     * @param string $roleName The name of the member role.
-     *
-     * @throws Exception Throws an exception with a 403 HTTP response code if the role is not valid.
-     */
-    public static function validateMemberRole(string $roleName): void
-    {
-        $roles = ['owner', 'admin', 'member'];
-        if (!in_array($roleName, $roles)) {
-            throw new Exception("The role is not valid, role options: owner, admin, or member");
-        }
-    }
-
-    /**
-     * Validate a user role.
-     *
-     * @param string $roleName The name of the user role.
-     *
-     * @throws Exception Throws an exception with a 403 HTTP response code if the role is not valid.
-     */
-    public static function validateUserRole(string $roleName): void
-    {
-        $roles = ['admin', 'member'];
-        if (!in_array($roleName, $roles)) {
-            throw new Exception("The role is not valid, role options: owner, admin, or member");
-        }
-    }
-
     /**
      * Perform a cURL request.
      *
@@ -105,56 +55,6 @@ final class Utils
         } else {
             return self::isJson($response) ? json_decode($response, true) : $response;
         }
-    }
-
-    /**
-     * Upload a file using cURL.
-     *
-     * @param string $url The URL to upload the file to.
-     * @param string $token The authentication token.
-     * @param string $filePath The path to the file to be uploaded.
-     *
-     * @return mixed Returns the decoded JSON response as an associative array on success, or a string containing the cURL error on failure.
-     */
-    public static function uploadDump(string $url, string $token, string $filePath): string|array
-    {
-        $headers = [
-            "Authorization: Bearer $token",
-        ];
-
-        $postData = [
-            'file' => new \CURLFile($filePath),
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-
-        curl_close($ch);
-
-        if ($error) {
-            return "Error: $error";
-        } else {
-            return \json_decode($response, true);
-        }
-    }
-
-    /**
-     * Get the closest region using a cURL request.
-     *
-     * @param string $token The authentication token.
-     *
-     * @return array Returns the closest region information as an associative array.
-     */
-    public static function closestRegion(string $token): array
-    {
-        return self::makeRequest('GET', 'https://region.turso.io', $token);
     }
 
     /**

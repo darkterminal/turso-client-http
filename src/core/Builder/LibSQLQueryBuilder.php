@@ -1,6 +1,6 @@
 <?php
 
-namespace Darkterminal\TursoHttp\sadness;
+namespace Darkterminal\TursoHttp\core\Builder;
 
 use Darkterminal\TursoHttp\core\LibSQLError;
 use Darkterminal\TursoHttp\LibSQL;
@@ -12,7 +12,7 @@ use SQLite3;
  *
  * A query builder for the LibSQL database.
  *
- * @package Darkterminal\TursoHttp\sadness
+ * @package Darkterminal\TursoHttp\core\Builder
  */
 class LibSQLQueryBuilder
 {
