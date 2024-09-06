@@ -2,6 +2,16 @@
 
 The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API (Only). It simplifies interaction with Turso databases using the Hrana over HTTP protocol. This library provides an object-oriented approach to build and execute SQL queries with same API Interface like PHP Native Extension [Turso Client PHP](https://github.com/tursodatabase/turso-client-php).
 
+<p align="center">
+  <a href="https://discord.gg/turso">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
+      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
+    </picture>
+  </a>
+</p>
+
 ---
 
 ## Requirements
