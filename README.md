@@ -37,7 +37,7 @@ The `TursoHTTP` library is a PHP wrapper for Turso HTTP Database API (Only). It 
 You can install the **TursoHTTP** library using Composer:
 
 ```bash
-composer require darkterminal/turso-http
+composer require darkterminal/turso-client-http
 ```
 
 ## Environment Variables
