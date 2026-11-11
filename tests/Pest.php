@@ -18,17 +18,31 @@ $authToken = getenv('DB_TOKEN') ?: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQ
 $db = new LibSQL("dbname=$dbname&authToken=$authToken");
 $builder = new LibSQLQueryBuilder($db);
 
-uses()->beforeAll(function () use ($db, $builder) {
+/*
+|--------------------------------------------------------------------------
+| One-time database seed
+|--------------------------------------------------------------------------
+|
+| Pest's uses()->beforeAll() is unusable here: hooks bound via uses() are
+| applied at the first per-test setUp() of each generated class, which is
+| AFTER PHPUnit's setUpBeforeClass() runs. The seed therefore never
+| executed, and the matching afterAll(dropAllTables()) wiped the fixtures
+| after EVERY test file.
+|
+| Instead the suite seeds a fresh cutover database once, eagerly, at
+| bootstrap time (once per phpunit process). Set TURSO_HTTP_SKIP_SEED=1 to
+| opt out (e.g. read-only smoke tests).
+|
+*/
+if (getenv('TURSO_HTTP_SKIP_SEED') !== '1') {
     $builder->dropAllTables();
 
-    $directory = getcwd() . '/tests/_files/database';
-    $pattern = '/\.sql$/';
+    $directory = __DIR__ . '/_files/database';
 
     $samples = glob($directory . '/*.sql');
     sort($samples);
 
-    $createTables = $samples[0];
-    array_shift($samples);
+    $createTables = array_shift($samples);
 
     $createTableQueries = array_map(function ($query) {
         return trim($query);
@@ -42,10 +56,16 @@ uses()->beforeAll(function () use ($db, $builder) {
         $db->executeBatch([
             'PRAGMA foreign_keys=OFF',
             file_get_contents($sample),
-            'PRAGMA foreign_keys=ON'
+            'PRAGMA foreign_keys=ON',
         ]);
     }
-})->in('Feature');
+
+    // Fixture copy used by the thatNeedsSampleTableWithData group (DeleteTest)
+    $db->executeBatch([
+        "CREATE TABLE artists_backup(artistid INTEGER PRIMARY KEY AUTOINCREMENT, name NVARCHAR)",
+        "INSERT INTO artists_backup SELECT artistid,name FROM artists",
+    ]);
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -65,21 +85,7 @@ uses()
         test()->db = $db;
         test()->builder = $builder;
     })
-    ->afterAll(function () use ($builder) {
-        $builder->dropAllTables();
-    })
     ->in('Feature');
-
-uses()
-    ->beforeAll(function () use ($db) {
-        $db->executeBatch([
-            "CREATE TABLE artists_backup(artistid INTEGER PRIMARY KEY AUTOINCREMENT, name NVARCHAR)",
-            "INSERT INTO artists_backup SELECT artistid,name FROM artists"
-        ]);
-    })->afterAll(function () use ($builder) {
-        $builder->dropTable('artists_backup');
-    })
-    ->group('thatNeedsSampleTableWithData');
 
 /*
 |--------------------------------------------------------------------------
