@@ -2,7 +2,7 @@
     "name": "darkterminal/turso-client-http",
     "description": "The Turso HTTP Client for PHP (wraps Turso Hrana-over-HTTP)",
     "license": "MIT",
-    "version": "v3.0.0",
+    "version": "v3.0.1",
     "autoload": {
         "psr-4": {
             "Darkterminal\\TursoHttp\\": "src/"
