@@ -140,12 +140,19 @@ The full user manual & tutorial lives on the **[Wiki](https://github.com/darkter
 
 - Pest suite: **60 tests, 103 assertions, all green** — repeatedly re-seeded
   from a pristine database.
+- Live **Turso Cloud** tests (`tests/Feature/TursoCloudConnectionTest.php`):
+  **2 tests / 11 assertions** covering the typed round trip (Hrana v3 int /
+  float / text / `NULL`) and transactions — against a real cloud database,
+  env-gated on `TURSO_CLOUD_DB_URL` / `TURSO_CLOUD_DB_TOKEN` (skipped
+  otherwise). Self-cleaning tables, safe to run repeatedly.
 - CI: GitHub Actions matrix on **PHP 8.3 / 8.4 / 8.5** against a seeded
   libsql-server service container — all green.
 - `docker/laravel-proof/`: fresh Laravel 12 app, package installed via path
   repository — **5/5 assertions green on all three PHP versions** (service
   provider discovery, facade resolution, connectivity, facade round trip,
   transaction commit).
+- HTTP errors (`401` / `403` / `404`) surface as catchable
+  `LibSQLError` exceptions with the server's message — no silent failures.
 
 Links: [docker/laravel-proof](docker/laravel-proof/) · [CI workflow](.github/workflows/tests.yml) · [Releases](https://github.com/darkterminal/turso-client-http/releases)
 
@@ -158,6 +165,15 @@ composer install
 
 The suite re-seeds a local `libsql-server` on `127.0.0.1:8081` itself (or
 whatever `DB_URL` points at). Set `TURSO_HTTP_SKIP_SEED=1` to skip seeding.
+
+The Turso Cloud tests run too when the live endpoint is configured (they
+skip otherwise):
+
+```dotenv
+TURSO_CLOUD_DB_URL=libsql://<db>-<org>.turso.io
+TURSO_CLOUD_DB_TOKEN=<token>
+```
+
 See [Wiki · Verification](https://github.com/darkterminal/turso-client-http/wiki/Verification).
 
 ## Contributing
