@@ -1,21 +1,61 @@
-![TursoHTTP](https://i.imgur.com/URmAyKX.png)
+> [!IMPORTANT]
+> This package is a **pure-PHP HTTP client** (**Hrana over HTTP**) for libSQL — it is
+> not the libSQL PHP extension, and it does not link against any native library. If you
+> want the native extension, use the turso-driver for your framework instead; this one
+> runs anywhere ext-curl works, including shared hosting and CI runners.
 
-The `TursoHTTP` library is a pure-PHP wrapper for Turso's HTTP Database API
-(**Hrana over HTTP**), mirroring the API of the native
-[turso-client-php](https://github.com/tursodatabase/turso-client-php)
-extension. It works without any PHP extension beyond `ext-curl` — it is a
-good fit for shared hosting, CI runners, and anywhere the native `.so` can't
-be installed.
+<p align="center">
+  <a href="https://discord.gg/9eAaMnJtfY">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
+      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <img alt="Turso + HTTP Client" src="https://i.imgur.com/URmAyKX.png">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/darkterminal/turso-client-http?color=F05340" alt="MIT License" /></a>
+  <a href="https://tur.so/discord-php"><img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" /></a>
+  <a href="#contributors"><img src="https://img.shields.io/github/contributors/darkterminal/turso-client-http?color=F05340" alt="Contributors" /></a>
+  <a href="https://packagist.org/packages/darkterminal/turso-client-http"><img src="https://img.shields.io/packagist/dt/darkterminal/turso-client-http?color=F05340" alt="Total downloads" /></a>
+  <a href="https://github.com/darkterminal/turso-client-http/tags"><img src="https://img.shields.io/github/v/tag/darkterminal/turso-client-http?label=version&color=F05340" alt="Version Tag" /></a>
+  <a href="https://github.com/darkterminal/turso-client-http/actions/workflows/tests.yml"><img src="https://github.com/darkterminal/turso-client-http/actions/workflows/tests.yml/badge.svg" alt="Testing" /></a>
+</p>
+
+<p align="center">
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and the <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Database API</a>.
+</p>
+
+<p align="center">
+  libSQL is an open-contribution fork of SQLite. This package provides a
+  pure-PHP HTTP client (Hrana over HTTP) for libSQL — Turso Cloud and
+  self-hosted libsql-server — with a Laravel-compatible service provider and
+  facade. The <code>docker/laravel-proof/</code> harness and the test suite
+  exercise transactions, the full Hrana pipeline, and the query builder end to end.
+</p>
+
+<p align="center">
+  Full user manual & tutorial now lives on the
+  <a href="https://github.com/darkterminal/turso-client-http/wiki">Wiki</a>.
+</p>
+
+---
 
 ## Requirements
 
 | Component | Requirement |
 |---|---|
-| PHP | 8.3, 8.4, 8.5 (CI-verified on all three) |
+| PHP | 8.3, 8.4 or 8.5 (CI-verified on all three) |
 | ext-curl | required |
 | ext-json | required |
 | ext-mbstring | required |
-| Composer | recommended (auto-loading) |
+| Turso Cloud or self-hosted libsql-server (`sqld`) | HTTP endpoint + token |
+| Native libSQL extension | **not** required |
 
 ## Installation
 
@@ -23,35 +63,29 @@ be installed.
 composer require darkterminal/turso-client-http
 ```
 
-## Usage
+## Configuration
 
-DSN syntax (kept API-compatible with the native extension):
+Plain PHP — pass a DSN (token parameter kept for API symmetry with the native client):
 
 ```php
 use Darkterminal\TursoHttp\LibSQL;
 
 $db = new LibSQL("dbname=libsql://<db>-<org>.turso.io&authToken=<token>");
-
-$version = $db->version();
-$result  = $db->query('SELECT count(*) AS c FROM artists');
 ```
 
-### Plain PHP (no framework)
+Fallbacks when no DSN argument is provided (used by the global helpers):
+`DB_URL`/`TURSO_URL` (default `http://127.0.0.1:8081`, local sqld) and
+`DB_TOKEN`/`TURSO_TOKEN`.
 
-```php
-use Darkterminal\TursoHttp\LibSQL;
+Laravel — after `composer require`, the auto-discovered
+`TursoServiceProvider` shares one client; publish the config if you want to
+change it:
 
-$db = new LibSQL("dbname=libsql://your-url.turso.io&authToken=your-token");
-
-$db->execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)');
-$rows = $db->query('SELECT * FROM users ORDER BY id')->fetchArray(LibSQL::LIBSQL_ASSOC);
+```bash
+php artisan vendor:publish --provider="Darkterminal\TursoHttp\Laravel\TursoServiceProvider" --tag=turso-http-config
 ```
 
-### Laravel — service provider + facade
-
-The package ships an auto-discovered `TursoServiceProvider` and a `Turso`
-facade. After `composer require`, Laravel discovers the provider
-automatically; the binding resolves to a shared `LibSQL` client.
+`.env`:
 
 ```dotenv
 DB_URL=libsql://your-url.turso.io
@@ -61,51 +95,59 @@ DB_TOKEN=your-token
 ```php
 use Darkterminal\TursoHttp\Laravel\Turso;
 
-// .env above feeds config/turso-http.php
-$version = Turso::version();
-Turso::execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)');
-$rows = Turso::query('SELECT * FROM users')->fetchArray(\Darkterminal\TursoHttp\LibSQL::LIBSQL_ASSOC);
+$rows = Turso::query('SELECT * FROM users')->fetchArray(
+    \Darkterminal\TursoHttp\LibSQL::LIBSQL_ASSOC
+);
 ```
 
-Publish the config if you want to see/override defaults:
+Everything else (timezone handling for DATETIME columns, `DB_STRICT_QUERY`,
+`DB_TIMEZONE`) is on the
+[Wiki · Configuration](https://github.com/darkterminal/turso-client-http/wiki/Configuration).
 
-```bash
-php artisan vendor:publish --provider="Darkterminal\TursoHttp\Laravel\TursoServiceProvider" --tag=turso-http-config
+## Usage
+
+```php
+use Darkterminal\TursoHttp\LibSQL;
+
+$db = new LibSQL("dbname=$DB_URL&authToken=$DB_TOKEN");
+
+$db->execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)');
+$db->execute('INSERT INTO users (name) VALUES (?)', ['Ada']);
+
+$rows = $db->query('SELECT * FROM users')->fetchArray(LibSQL::LIBSQL_ASSOC);
 ```
 
-For a real end-to-end Laravel 12 app, see `docker/laravel-proof/` in this
-repository (builds a fresh skeleton, installs the package via a path
-repository, and asserts SP discovery / facade resolution / facade round trip
-/ transactions).
+Transactions: `$tx = $db->transaction('deferred');` → `$tx->execute(...)` →
+`$tx->commit();` / `$tx->rollback();`.
 
-### non-Laravel verification
+Full tour (fetch modes, transactions, query builder, `*Return` statements):
+[Wiki · Basic Usage](https://github.com/darkterminal/turso-client-http/wiki/Basic-Usage).
 
-Pest suite covers 60 tests against a local `libsql-server` on `127.0.0.1:8081` — set `DB_URL`/`DB_TOKEN` or rely on the local sqld (seeds automatically). CI runs the same matrix on PHP 8.3/8.4/8.5.
+## Documentation
 
-## Features
+The full user manual & tutorial lives on the **[Wiki](https://github.com/darkterminal/turso-client-http/wiki)**:
 
-- [libSQL Native Extension](https://github.com/tursodatabase/turso-client-php)-like API (`LibSQL::query`/`execute`, `LibSQLResult::fetchArray`, transactions)
-- Schema Builder and Query Builder (fluent API)
-- Full pipeline v2 protocol over HTTP (works against Turso Cloud and self-hosted sqld)
-- Timezone support for DATETIME columns
-- PHP 8.3 / 8.4 / 8.5 verified in CI
+- [Installation](https://github.com/darkterminal/turso-client-http/wiki/Installation)
+- [Configuration](https://github.com/darkterminal/turso-client-http/wiki/Configuration)
+- [Basic Usage](https://github.com/darkterminal/turso-client-http/wiki/Basic-Usage)
+- [Laravel Integration](https://github.com/darkterminal/turso-client-http/wiki/Laravel)
+- [Query Builder](https://github.com/darkterminal/turso-client-http/wiki/Query-Builder)
+- [Verification & Proof Harness](https://github.com/darkterminal/turso-client-http/wiki/Verification)
+- [Known Limitations](https://github.com/darkterminal/turso-client-http/wiki/Known-Limitations)
+- [Troubleshooting](https://github.com/darkterminal/turso-client-http/wiki/Troubleshooting)
 
-## What is NOT supported
+## Verification
 
-- Offline / sqld journaled-writes flavors — those need the native extension
-  (`tutorial/docs` note: this client speaks HTTP; sqld offline mode requires
-  native sync semantics)
-- Vector casts in the Query Builder — write raw `vector(...)` SQL if you want
-  vector search, exactly like with the native client
+- Pest suite: **60 tests, 103 assertions, all green** — repeatedly re-seeded
+  from a pristine database.
+- CI: GitHub Actions matrix on **PHP 8.3 / 8.4 / 8.5** against a seeded
+  libsql-server service container — all green.
+- `docker/laravel-proof/`: fresh Laravel 12 app, package installed via path
+  repository — **5/5 assertions green on all three PHP versions** (service
+  provider discovery, facade resolution, connectivity, facade round trip,
+  transaction commit).
 
-## Environment variables
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `DB_URL` or `TURSO_URL` | `http://127.0.0.1:8081` | sqld/HTTP endpoint |
-| `DB_TOKEN` or `TURSO_TOKEN` | public test token | auth |
-| `DB_TIMEZONE` | `UTC` | DATETIME conversion zone |
-| `DB_STRICT_QUERY` | `false` | strict-query mode for `explain` |
+Links: [docker/laravel-proof](docker/laravel-proof/) · [CI workflow](.github/workflows/tests.yml) · [Releases](https://github.com/darkterminal/turso-client-http/releases)
 
 ## Testing
 
@@ -114,9 +156,23 @@ composer install
 ./vendor/bin/pest
 ```
 
-The suite expects a local `libsql-server` on `127.0.0.1:8081` (or whatever
-`DB_URL` points at). CI provisions a service container automatically.
+The suite re-seeds a local `libsql-server` on `127.0.0.1:8081` itself (or
+whatever `DB_URL` points at). Set `TURSO_HTTP_SKIP_SEED=1` to skip seeding.
+See [Wiki · Verification](https://github.com/darkterminal/turso-client-http/wiki/Verification).
+
+## Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## Security Vulnerabilities
+
+Please do not open public issues for vulnerabilities. Report them privately via
+[GitHub Security Advisories](https://github.com/darkterminal/turso-client-http/security/advisories/new).
+
+## Contributors
+
+![Contributors](https://contrib.nn.ci/api?no_bot=true&repo=darkterminal/turso-client-http)
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.
