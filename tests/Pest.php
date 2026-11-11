@@ -4,14 +4,17 @@ use Darkterminal\TursoHttp\LibSQL;
 use Darkterminal\TursoHttp\core\Builder\LibSQLQueryBuilder;
 use Dotenv\Dotenv;
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+// Load .env if present (local development convenience), otherwise rely on
+// environment variables / defaults so CI needs no secrets.
+if (file_exists(__DIR__ . '/../.env')) {
+    Dotenv::createUnsafeImmutable(__DIR__ . '/..')->load();
+}
 
 // Disable strict query in test
 putenv("DB_STRICT_QUERY=false");
 
-$dbname = getenv('DB_URL');
-$authToken = getenv('DB_TOKEN');
+$dbname = getenv('DB_URL') ?: 'http://127.0.0.1:8081';
+$authToken = getenv('DB_TOKEN') ?: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ';
 $db = new LibSQL("dbname=$dbname&authToken=$authToken");
 $builder = new LibSQLQueryBuilder($db);
 
@@ -21,13 +24,8 @@ uses()->beforeAll(function () use ($db, $builder) {
     $directory = getcwd() . '/tests/_files/database';
     $pattern = '/\.sql$/';
 
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
-    $regexIterator = new RegexIterator($iterator, $pattern, RegexIterator::MATCH );
-
-    $samples = [];
-    foreach ($regexIterator as $file) {
-        $samples[] = $file->getPathname();
-    }
+    $samples = glob($directory . '/*.sql');
+    sort($samples);
 
     $createTables = $samples[0];
     array_shift($samples);

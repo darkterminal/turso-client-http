@@ -1754,7 +1754,8 @@ if (!function_exists('libsql_url')) {
             return $turso_prefix;
         }
 
-        return null;
+        // Local development default — point to a seeded sqld (CI / docker).
+        return 'http://127.0.0.1:8081';
     }
 }
 
@@ -1772,7 +1773,8 @@ if (!function_exists('libsql_token')) {
             return $turso_prefix;
         }
 
-        return null;
+        // Public test fixture token — only usable against the local seeded sqld.
+        return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ';
     }
 }
 
@@ -1864,7 +1866,7 @@ if (!function_exists('platform_api_url')) {
      * @param string|null $path The path to append to the base URL.
      * @return string The base URL for the Turso API.
      */
-    function platform_api_url(string $path = null)
+    function platform_api_url(?string $path = null)
     {
         $baseUrl = 'https://api.turso.tech/v1';
         return is_null($path) ? $baseUrl : "{$baseUrl}{$path}";

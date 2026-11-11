@@ -60,4 +60,40 @@ enum LibSQLTypes: string
             ],
         };
     }
+
+    /**
+     * Decode a Hrana-v3 typed cell back into a plain PHP value.
+     * Raw (v2-style) values pass through unchanged.
+     *
+     * @param mixed $cell A cell from an HTTP response result row.
+     * @return mixed
+     */
+    public static function decode(mixed $cell): mixed
+    {
+        if (!is_array($cell) || !isset($cell['type'])) {
+            return $cell;
+        }
+
+        return match ($cell['type']) {
+            'null' => null,
+            'integer' => PHP_INT_SIZE === 8
+                ? (int) $cell['value']
+                : (string) $cell['value'],
+            'float' => isset($cell['value']) ? (float) $cell['value'] : null,
+            'text' => $cell['value'] ?? '',
+            'blob' => isset($cell['base64']) ? base64_decode($cell['base64'], true) : (base64_decode($cell['value'] ?? '', true) ?: null),
+            default => $cell,
+        };
+    }
+
+    /**
+     * Decode a full result row (array of typed cells).
+     *
+     * @param array $row Row as returned by the HTTP pipeline.
+     * @return array
+     */
+    public static function decodeRow(array $row): array
+    {
+        return array_map([self::class, 'decode'], $row);
+    }
 }

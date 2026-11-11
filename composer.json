@@ -1,8 +1,8 @@
 {
     "name": "darkterminal/turso-client-http",
-    "description": "The Turso Client HTTP library is a PHP wrapper for Turso HTTP Database API",
+    "description": "The Turso HTTP Client for PHP (wraps Turso Hrana-over-HTTP)",
     "license": "MIT",
-    "version": "v2.9.2",
+    "version": "v3.0.0-dev",
     "autoload": {
         "psr-4": {
             "Darkterminal\\TursoHttp\\": "src/"
@@ -30,12 +30,15 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
-        "vlucas/phpdotenv": "^5.6",
-        "monolog/monolog": "^3.7"
+        "php": "^8.3",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "vlucas/phpdotenv": "^5.8",
+        "monolog/monolog": "^3.8"
     },
     "require-dev": {
-        "pestphp/pest": "^2.34"
+        "pestphp/pest": "^3.0"
     },
     "config": {
         "allow-plugins": {
@@ -46,5 +49,12 @@
         "test": [
             "./vendor/bin/pest"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Darkterminal\\TursoHttp\\Laravel\\TursoServiceProvider"
+            ]
+        }
     }
 }

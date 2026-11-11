@@ -712,7 +712,7 @@ class LibSQLQueryBuilder
      * @param string|null $alias The alias for the CASE expression result.
      * @return $this
      */
-    public function addCaseExpression(string $expression, string $alias = null)
+    public function addCaseExpression(string $expression, ?string $alias = null)
     {
         $this->caseExpressions[] = [
             'expression' => $expression,
@@ -729,7 +729,7 @@ class LibSQLQueryBuilder
      * @param string|null $else The ELSE result.
      * @return string The constructed CASE expression.
      */
-    public function buildCaseExpression(string $caseExpression, array $whenThens, string $else = null)
+    public function buildCaseExpression(string $caseExpression, array $whenThens, ?string $else = null)
     {
         $caseSql = "CASE {$caseExpression} ";
         foreach ($whenThens as $when => $then) {
@@ -748,7 +748,7 @@ class LibSQLQueryBuilder
      * @param string|null $table The table name (optional).
      * @return string The constructed SQL query string.
      */
-    public function getQuery(string $table = null): string
+    public function getQuery(?string $table = null): string
     {
         $table ??= $this->table;
         $sql = "SELECT {$this->columns}";
@@ -977,7 +977,7 @@ SQL;
      * @param string|null $table The table name (optional).
      * @return array The query results.
      */
-    public function get(string $table = null)
+    public function get(?string $table = null)
     {
         $mainQuery = $this->getQuery($table);
 

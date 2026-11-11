@@ -1,0 +1,58 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: php ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    services:
+      sqld:
+        image: ghcr.io/tursodatabase/libsql-server:latest
+        ports:
+          - 8081:8080
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.3', pest: '^3.0' }
+          - { php: '8.4', pest: '^3.0' }
+          - { php: '8.5', pest: '^3.0' }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Seed sqld (initialize WAL)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf -m 2 -X POST http://127.0.0.1:8081/v2/pipeline \
+              -H 'Content-Type: application/json' \
+              -d '{"requests":[{"type":"execute","stmt":{"sql":"CREATE TABLE IF NOT EXISTS _boot (id INTEGER PRIMARY KEY)"}},{"type":"close"}]}' > /dev/null 2>&1; then
+              echo "sqld ready"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Tests
+        env:
+          DB_URL: http://127.0.0.1:8081
+          DB_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJpYXQiOjE3MzY2MzU1MTUsIm5iZiI6MTczNjYzNTUxNSwiZXhwIjoxNzM3MjQwMzE1LCJqdGkiOiJkYjEifQ.5sm4FN4PosAJ5h9wLay6q3ryAxbGRGuETU1A3F_Tr3WXpAEnr98tmAa92qcpZz_YZN0T_h4RqjGlEMgrSwIJAQ
+        run: vendor/bin/pest

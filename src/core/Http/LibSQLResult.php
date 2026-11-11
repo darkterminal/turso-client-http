@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Darkterminal\TursoHttp\core\Http;
 
-use Darkterminal\TursoHttp\core\Enums\DataType;
-use Darkterminal\TursoHttp\core\Enums\Timezone;
-use Darkterminal\TursoHttp\core\Utils;
 use Darkterminal\TursoHttp\LibSQL;
 use DateTime;
-use Generator;
 
 /**
  * Represents the result of a LibSQL query.
+ *
+ * Typed Hrana-v3 cells are normalized to plain PHP values in the constructor,
+ * so every fetcher (ASSOC / NUM / BOTH / ALL) returns consistent data.
  */
 class LibSQLResult
 {
@@ -27,211 +28,159 @@ class LibSQLResult
 
     public function __construct(array $results)
     {
-        $this->baton = $results['baton'];
-        $this->base_url = $results['base_url'];
-        $this->results = Utils::removeCloseResponses($results['results']);
-        $this->rows_read = $this->results['rows_read'];
-        $this->rows_written = $this->results['rows_written'];
-        $this->query_duration_ms = $this->results['query_duration_ms'];
-        $this->cols = $this->results['cols'];
-        $this->rows = $this->results['rows'];
+        $this->baton = $results['baton'] ?? null;
+        $this->base_url = $results['base_url'] ?? null;
+        $this->results = \Darkterminal\TursoHttp\core\Utils::removeCloseResponses($results['results']);
+        $this->rows_read = $this->results['rows_read'] ?? 0;
+        $this->rows_written = $this->results['rows_written'] ?? 0;
+        $this->query_duration_ms = $this->results['query_duration_ms'] ?? 0.0;
+        $this->cols = $this->results['cols'] ?? [];
+        $this->rows = array_map(
+            [LibSQLTypes::class, 'decodeRow'],
+            $this->results['rows'] ?? [],
+        );
     }
 
-    /**
-     * Fetches the result set as an array.
-     *
-     * @param int $mode The fetching mode (optional, default is 3).
-     *
-     * @return array The fetched result set.
-     */
-    public function fetchArray(int $mode = 3)
+    /** Fetch the result set as an array. */
+    public function fetchArray(int $mode = LibSQL::LIBSQL_BOTH): array
     {
-        if ($mode !== LibSQL::LIBSQL_ALL) {
-            $results = [];
-            $i = 0;
-            while ($i < count($this->rows)) {
-                if ($mode === LibSQL::LIBSQL_ASSOC) {
-                    $results = $this->getAssoc($this->cols, $this->rows);
-                } else if ($mode === LibSQL::LIBSQL_NUM) {
-                    $results = $this->getNum($this->rows);
-                } else {
-                    array_push(
-                        $results,
-                        array_merge(
-                            $this->getAssoc($this->cols, $this->rows),
-                            $this->getNum($this->rows)
-                        )
-                    );
-                }
-                $i++;
-            }
-
-            return $results;
+        if ($mode === LibSQL::LIBSQL_ALL) {
+            return $this->results;
         }
 
-        return $this->results;
+        return match ($mode) {
+            LibSQL::LIBSQL_ASSOC => $this->getAssocRows(),
+            LibSQL::LIBSQL_NUM => $this->getNumRows(),
+            default => array_map(
+                static fn (array $assoc, array $num) => array_merge($assoc, $num),
+                $this->getAssocRows(),
+                $this->getNumRows(),
+            ),
+        };
     }
 
-    /**
-     * Returns an iterator that yields the result set as an array.
-     *
-     * @return Generator
-     */
-    public function lazyFetchArray()
+    /** Lazily iterate rows as [assoc => value, num => value] pairs. */
+    public function lazyFetchArray(): \Generator
     {
-        $results = array_merge(
-            $this->getAssoc($this->cols, $this->rows),
-            $this->getNum($this->rows)
-        );
-
-        foreach ($results as $data) {
+        $merged = array_merge($this->getAssocRows(), $this->getNumRows());
+        foreach ($merged as $data) {
             yield $data;
         }
     }
 
-    /**
-     * Finalizes the result set and frees the associated resources.
-     *
-     * @return void
-     */
-    public function finalize()
+    /** Finalize the result set. */
+    public function finalize(): void
     {
-        // 
+        // nothing to free — rows are self-contained arrays
     }
 
-    /**
-     * Resets the result set for re-execution.
-     *
-     * @return void
-     */
-    public function reset()
+    /** Reset the result set. */
+    public function reset(): void
     {
-        // 
+        // rows are read-only after construction
     }
 
-    /**
-     * Retrieves the statistics of the result set.
-     *
-     * @return array An associative array containing the following keys:
-     *  - 'rows_read': The number of rows read from the result set.
-     *  - 'rows_written': The number of rows written to the result set.
-     *  - 'query_duration_ms': The duration of the query in milliseconds.
-     */
-    public function getStats()
+    /** Query execution statistics. */
+    public function getStats(): array
     {
         return [
             'rows_read' => $this->rows_read,
             'rows_written' => $this->rows_written,
-            'query_duration_ms' => $this->query_duration_ms
+            'query_duration_ms' => $this->query_duration_ms,
         ];
     }
 
-    // /**
-    //  * Retrieves the name of a column by its index.
-    //  *
-    //  * @param int $column The index of the column.
-    //  *
-    //  * @return string The name of the column.
-    //  */
-    public function columnName(int $column)
+    public function columnName(int $column): string
     {
-        return array_map(function ($col) {
-            return $col['name'];
-        }, $this->cols)[$column];
+        return $this->cols[$column]['name'] ?? throw new \InvalidArgumentException("Column index $column out of range");
     }
 
-    /**
-     * Retrieves the type of a column by its index.
-     *
-     * @param int $column The index of the column.
-     *
-     * @return string The type of the column.
-     */
-    public function columnType(int $column)
+    public function columnType(int $column): ?string
     {
-        return array_map(function ($col) {
-            return $col['decltype'];
-        }, $this->cols)[$column];
+        return $this->cols[$column]['decltype'] ?? null;
     }
 
-    /**
-     * Retrieves the number of columns in the result set.
-     *
-     * @return int The number of columns.
-     */
-    public function numColumns()
+    public function numColumns(): int
     {
         return count($this->cols);
     }
 
-    private function getAssoc($tableColumns, $tableRows)
+    /** @return list<array<string, mixed>> */
+    private function getAssocRows(): array
     {
+        $columns = array_map(
+            static fn (array $col) => $col['name'] ?? '',
+            $this->cols,
+        );
+
         $results = [];
-        $columns = array_map(function ($col) {
-            return $col['name'];
-        }, $tableColumns);
-
-        $values = array_map(function ($vals) {
-            $arr_vals = [];
-            $i = 0;
-            foreach ($vals as $val) {
-                if ($val['type'] === "null")
-                    $val['value'] = null;
-                $arr_vals[] = $this->cast($val['type'], $val['value']);
-                $i++;
+        foreach ($this->rows as $row) {
+            $assoc = [];
+            foreach ($columns as $i => $name) {
+                $assoc[$name] = $this->castCell($this->columnType($i), $row[$i] ?? null);
             }
-            return $arr_vals;
-        }, $tableRows);
-
-        foreach ($values as $value) {
-            $results[] = array_combine($columns, $value);
+            $results[] = $assoc;
         }
 
         return $results;
     }
 
-    private function getNum($tableRows)
+    /** @return list<list<mixed>> */
+    private function getNumRows(): array
     {
-        $values = [];
-        foreach ($tableRows as $row) {
-            $i = 0;
-            if (isset($row['value'])) {
-                foreach ($row as $data) {
-                    $type = $this->columnType($i) ?? $data['type'];
-                    $values[] = $this->cast($type, $data['value']);
-                    $i++;
-                }
+        $results = [];
+        foreach ($this->rows as $row) {
+            $num = [];
+            foreach ($row as $i => $value) {
+                $num[] = $this->castCell($this->columnType($i), $value);
+            }
+            $results[] = $num;
+        }
+
+        return $results;
+    }
+
+    /** @return mixed */
+    private function castCell(?string $columnType, mixed $value): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_bool($value) || is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && ($columnType === 'blob' || self::isBlobValue($value))) {
+            // rows are already decoded values; raw BLOBs arrive base64-wrapped
+            $decoded = base64_decode(base64_decode($value, true), true);
+            return $decoded !== false ? $decoded : $value;
+        }
+
+        if (is_string($value) && $this->isValidDateTime($value)) {
+            $timezone = \Darkterminal\TursoHttp\core\Enums\Timezone::fromString(libsql_timezone() ?: 'UTC');
+            if ($timezone) {
+                return $timezone->convertFromUtc($value);
             }
         }
-        return $values;
+
+        return $value;
     }
 
-    private function cast(string $type, mixed $value)
+    private static function isBlobValue(string $value): bool
     {
-        if ($type == DataType::BLOB) {
-            return base64_encode(base64_encode($value));
+        $inner = base64_decode($value, true);
+        if ($inner === false) {
+            return false;
         }
 
-        $type = $this->isValidDateTime($value) ? 'datetime' : $type;
-
-        $timezoneString = libsql_timezone();
-        $timezone = empty($timezoneString) ? Timezone::fromString('UTC') : Timezone::fromString($timezoneString);
-
-        $result = match (strtolower($type)) {
-            'null' => null,
-            'boolean', 'integer' => (int) $value,
-            'double', 'float' => (float) $value,
-            'string', 'text' => (string) $value,
-            'datetime' => $timezone->convertFromUtc($value),
-            default => null,
-        };
-
-        return $result;
+        return base64_encode($inner) === $value && ctype_print($inner);
     }
 
-    private function isValidDateTime($dateString, $format = 'Y-m-d H:i:s')
+    private function isValidDateTime(string $string, string $format = 'Y-m-d H:i:s'): bool
     {
-        $dateTime = DateTime::createFromFormat($format, $dateString ?? date($format));
-        return $dateTime && $dateTime->format($format) === $dateString;
+        $dateTime = DateTime::createFromFormat($format, $string);
+
+        return $dateTime && $dateTime->format($format) === $string;
     }
 }

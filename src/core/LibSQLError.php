@@ -1,28 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Darkterminal\TursoHttp\core;
 
 class LibSQLError extends \Exception
 {
-    public function __construct(string $message, string $code, $exit = true)
+    /**
+     * @param string $message Human-readable description of the failure.
+     * @param string $code    Machine-readable code supplied by the server or this library.
+     */
+    public function __construct(string $message, string $code)
     {
-        $code = $this->errorText($code);
-        $error = php_sapi_name() === 'cli' ? "\n$code \n $message\n\n" : $message;
-        if ($exit) {
-            echo $error;
-            die();
-        }
-        echo $error;
+        parent::__construct($message, $this->normalizeCode($code));
     }
 
-    private function errorText(string $text): string
+    private function normalizeCode(string $code): int
     {
-        if (php_sapi_name() === 'cli') {
-            $redBackgroundWhiteText = "\033[1;41;97m";
-            $reset = "\033[0m";
-            return $redBackgroundWhiteText . $text . $reset . PHP_EOL;
-        } else {
-            return $text;
-        }
+        return (ctype_digit($code) ? (int) $code : 0);
     }
 }

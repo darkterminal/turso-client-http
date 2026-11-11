@@ -31,7 +31,7 @@ class Request implements Response
     private \Closure|null $before_hook = null;
     private \Closure|null $after_hook = null;
 
-    public function __construct(string $database, string $token = null, \Closure|null $before_hook, \Closure|null $after_hook)
+    public function __construct(string $database, ?string $token = null, ?\Closure $before_hook = null, ?\Closure $after_hook = null)
     {
         $this->requestData = [
             'requests' => [],
