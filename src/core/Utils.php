@@ -48,12 +48,25 @@ final class Utils
 
         $response = curl_exec($curl);
         $err = curl_error($curl);
+        $httpCode = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+
+        $decoded = self::isJson($response) ? json_decode($response, true) : $response;
 
         if ($err) {
-            return "cURL Error: $err";
-        } else {
-            return self::isJson($response) ? json_decode($response, true) : $response;
+            throw new LibSQLError("cURL error (HTTP $httpCode): $err", 'CURL_ERROR');
         }
+
+        // Non-2xx responses (e.g. 401/403/404) carry their reason in the
+        // body (often JSON with an "error" key) — surface it as a proper
+        // exception instead of returning it as if it were data.
+        if ($httpCode < 200 || $httpCode >= 300) {
+            $message = is_array($decoded) && isset($decoded['error']) && is_string($decoded['error'])
+                ? $decoded['error']
+                : (is_string($decoded) && $decoded !== '' ? $decoded : "HTTP $httpCode");
+            throw new LibSQLError("HTTP $httpCode: $message", 'HTTP_ERROR');
+        }
+
+        return $decoded;
     }
 
     /**
