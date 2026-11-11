@@ -3,7 +3,8 @@
 #
 #   docker/laravel-proof/proof.sh
 
-FROM php:8.4-cli-bookworm
+ARG PHP_VERSION=8.4
+FROM php:${PHP_VERSION}-cli-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_ALLOW_SUPERUSER=1 \
