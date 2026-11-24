@@ -1,7 +1,7 @@
 /* ==========================================================================
    Turso Client HTTP — landing page styles
    Self-contained companion to assets/css/site.css (the user manual).
-   Warm-teal palette sampled from docs/images/turso-client-http-logo.png.
+   Warm teal palette sampled from docs/images/turso-client-http-logo.png.
    No CDN, no build step.
    ========================================================================== */
 
@@ -43,9 +43,9 @@
     /* Palette sampled from docs/images/turso-client-http-logo.png:
        teal accent #01D49B, warm ink #171B19, warm paper #F5FAF8. */
     --bg: #f5faf8;
-    --surface: #fcfffd;
+    --surface: #fffefd;
     --surface-2: #e8f3ef;
-    --surface-3: #dcece6;
+    --surface-3: #dceee8;
     --border: #d1e3dc;
     --border-strong: #b2cdc2;
     --text: #171b19;
@@ -53,11 +53,12 @@
     --faint: #63736d;
     --accent: #0b8f6a;
     --accent-soft: rgba(1, 212, 155, 0.12);
-    --accent-border: rgba(11, 143, 106, 0.32);
+    --accent-border: rgba(11, 143, 106, 0.35);
     --ink: #171b19;
     --on-ink: #f5faf8;
     --shadow: 0 1px 2px rgba(23, 27, 25, 0.05),
-        0 20px 44px -26px rgba(23, 27, 25, 0.28);
+        0 20px 44px -26px rgba(23, 27, 25, 0.22);
+    --hero-mark-opacity: 0.12;
 
     --header-h: 64px;
     --radius-sm: 6px;
@@ -69,7 +70,7 @@
     --bg: #0b1210;
     --surface: #121b18;
     --surface-2: #182420;
-    --surface-3: #1f2e29;
+    --surface-3: #20302a;
     --border: #243631;
     --border-strong: #355149;
     --text: #ecf5f1;
@@ -82,6 +83,7 @@
     --on-ink: #0b1210;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.5),
         0 26px 64px -34px rgba(0, 0, 0, 0.9);
+    --hero-mark-opacity: 0.16;
 }
 
 *,
@@ -309,7 +311,7 @@ a:hover {
     line-height: 1;
 }
 
-/* The turso-client-http logo is a coloured mark; keep it unchanged in both
+/* The turso-client-php logo is a coloured mark; keep it unchanged in both
    themes. */
 .brand__mark img {
     width: 20px;
@@ -452,9 +454,6 @@ a:hover {
     align-items: center;
     gap: 56px;
 }
-.hero-grid > * {
-    min-width: 0;
-}
 
 .eyebrow {
     display: inline-flex;
@@ -479,22 +478,17 @@ a:hover {
     letter-spacing: -0.05em;
 }
 
-.hero__dim {
-    color: var(--faint);
+.hero h1 em {
+    font-style: normal;
+    color: var(--accent);
 }
 
-.lede,
 .hero__sub {
     max-width: 46ch;
     margin-top: 24px;
     color: var(--muted);
     font-size: 1.125rem;
     line-height: 1.6;
-}
-
-.hero__copy,
-.hero__visual {
-    min-width: 0;
 }
 
 .hero__actions {
@@ -510,54 +504,21 @@ a:hover {
     border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow);
-    min-width: 0;
 }
 .shot-frame__bar {
     display: flex;
     align-items: center;
-    gap: 10px;
-    height: 42px;
-    padding: 0 14px;
+    gap: 7px;
+    height: 34px;
+    padding: 0 12px;
     border-bottom: 1px solid var(--border);
     background: var(--surface-2);
 }
-.shot-frame__dots {
-    display: inline-flex;
-    gap: 6px;
-}
-.shot-frame__dots i,
 .shot-frame__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: var(--border-strong);
-}
-.shot-frame__title {
-    color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-}
-.shot-frame__code {
-    min-width: 0;
-}
-.shot-frame__code pre,
-.step__code pre,
-pre {
-    max-width: 100%;
-}
-.shot-frame__code pre {
-    margin: 0;
-    padding: 20px;
-    overflow-x: auto;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    line-height: 1.75;
-}
-.shot-caption {
-    margin-top: 12px;
-    color: var(--faint);
-    font-size: 0.8125rem;
 }
 .shot-frame__label {
     margin-left: 8px;
@@ -738,10 +699,6 @@ pre {
 .step {
     padding-top: 22px;
     border-top: 1px solid var(--border-strong);
-    min-width: 0;
-}
-.steps > * {
-    min-width: 0;
 }
 .step__num {
     display: block;
@@ -767,54 +724,6 @@ pre {
     color: var(--text);
     font-family: var(--font-mono);
     font-size: 0.8125rem;
-}
-
-.step__code,
-.terminal,
-.shot-frame__code {
-    min-width: 0;
-    max-width: 100%;
-}
-.step__code {
-    margin-top: 16px;
-    overflow: hidden;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius);
-    background: var(--surface);
-}
-.step__code-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 42px;
-    padding: 0 12px 0 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--faint);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-}
-.step__code pre {
-    margin: 0;
-    padding: 18px;
-    overflow-x: auto;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    line-height: 1.75;
-    white-space: pre;
-}
-
-.docs-cta {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 28px;
-}
-.docs-cta__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
 }
 
 /* --------------------------------------------------------------------------
@@ -849,9 +758,7 @@ pre {
     font-size: 0.6875rem;
     letter-spacing: 0.08em;
 }
-.copy-btn,
-.install__copy,
-.code-copy {
+.copy-btn {
     display: inline-grid;
     place-items: center;
     width: 30px;
@@ -863,57 +770,24 @@ pre {
     background: var(--surface);
     color: var(--muted);
     cursor: pointer;
-    flex: 0 0 auto;
 }
-.copy-btn:hover,
-.install__copy:hover,
-.code-copy:hover {
+.copy-btn:hover {
     color: var(--text);
     border-color: var(--border-strong);
 }
-.copy-btn svg,
-.install__copy svg,
-.code-copy svg {
+.copy-btn svg {
     width: 15px;
     height: 15px;
 }
-.copy-btn .icon-check,
-.copy-btn .check-icon,
-.install__copy .check-icon,
-.code-copy .check-icon {
+.copy-btn .icon-check {
     display: none;
 }
-.copy-btn.is-copied .icon-copy,
-.copy-btn.is-copied .copy-icon,
-.install__copy.is-copied .copy-icon,
-.code-copy.is-copied .copy-icon {
+.copy-btn.is-copied .icon-copy {
     display: none;
 }
-.copy-btn.is-copied .icon-check,
-.copy-btn.is-copied .check-icon,
-.install__copy.is-copied .check-icon,
-.code-copy.is-copied .check-icon {
+.copy-btn.is-copied .icon-check {
     display: block;
     color: var(--accent);
-}
-
-.install {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 20px;
-    padding: 10px 12px 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    max-width: 100%;
-}
-.install__prompt { color: var(--accent); user-select: none; font-family: var(--font-mono); }
-.install__cmd {
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    overflow-wrap: anywhere;
 }
 .terminal pre {
     margin: 0;
@@ -1249,11 +1123,8 @@ pre {
     }
     .roles,
     .steps,
-    .quick-grid,
-    .docs-cta {
+    .quick-grid {
         grid-template-columns: 1fr;
-        flex-direction: column;
-        align-items: flex-start;
     }
     .role {
         border-right: 0;
@@ -1285,13 +1156,8 @@ pre {
     .btn {
         width: 100%;
     }
-    .hero__actions .btn,
-    .docs-cta__actions .btn {
+    .hero__actions .btn {
         flex: 1 1 auto;
-    }
-    .install {
-        display: flex;
-        width: 100%;
     }
 }
 
@@ -1305,4 +1171,35 @@ pre {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+
+/* --------------------------------------------------------------------------
+   Turso Client HTTP additions — code tokens + small compatibility
+   -------------------------------------------------------------------------- */
+
+.shot-frame__body code { color: var(--text); }
+.tok-k { color: #c084fc; }
+.tok-f { color: #60a5fa; }
+.tok-s { color: #34d399; }
+.tok-v { color: #f5ede8; }
+.tok-n { color: #fbbf24; }
+.tok-c { color: #94a3b8; }
+[data-theme="light"] .tok-k { color: #7c3aed; }
+[data-theme="light"] .tok-f { color: #2563eb; }
+[data-theme="light"] .tok-s { color: #059669; }
+[data-theme="light"] .tok-v { color: #1a1513; }
+[data-theme="light"] .tok-n { color: #b45309; }
+[data-theme="light"] .tok-c { color: #64748b; }
+
+.hero__sub code,
+.tile p code,
+.quick-grid code,
+.footer__about p code {
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.88em;
 }

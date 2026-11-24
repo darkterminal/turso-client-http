@@ -1,11 +1,10 @@
 ---
 ---
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-baseurl="{{ site.baseurl }}">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="color-scheme" content="dark light" />
         <title>Turso Client HTTP — Pure-PHP Hrana Client for libSQL</title>
         <meta
             name="description"
@@ -24,18 +23,20 @@
 
         <link rel="icon" href="{{ site.baseurl }}/favicon-32.png" type="image/png" sizes="32x32" />
         <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico" />
+        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/landing.css" />
 
         <script>
             (function () {
-                var theme = localStorage.getItem("docs-theme") || "dark";
+                var theme = "dark";
+                try {
+                    theme = localStorage.getItem("docs-theme") || "dark";
+                } catch (e) {}
                 document.documentElement.setAttribute("data-theme", theme);
             })();
         </script>
-
-        <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/landing.css" />
     </head>
-    <body data-baseurl="{{ site.baseurl }}">
-        <a class="skip" href="#content">Skip to content</a>
+    <body>
+        <a class="skip-link" href="#content">Skip to content</a>
 
         <header class="site-header">
             <div class="container header-inner">
@@ -47,20 +48,47 @@
                     <span class="brand__tag">Hrana over HTTP</span>
                 </a>
 
-                <div class="header-right">
-                    <nav class="nav" aria-label="Primary">
-                        <a class="nav__link" href="{{ site.baseurl }}/user-manual/">User manual</a>
-                        <a class="nav__link nav__link--icon" href="https://github.com/darkterminal/turso-client-http" target="_blank" rel="noopener">
-                            <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                            GitHub
-                        </a>
-                    </nav>
-                    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme">
-                        <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/></svg>
-                        <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 119.5 3.5a7 7 0 0011 11z"/></svg>
+                <nav class="main-nav" aria-label="Main">
+                    <a href="#features">Features</a>
+                    <a href="#quick-start">Quick start</a>
+                    <a href="{{ site.baseurl }}/user-manual/">Documentation</a>
+                    <a href="https://github.com/darkterminal/turso-client-http">GitHub</a>
+                </nav>
+
+                <div class="header-actions">
+                    <a class="star-pill" href="https://github.com/darkterminal/turso-client-http" target="_blank" rel="noopener noreferrer" aria-label="Turso Client HTTP on GitHub">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 .3a12 12 0 0 0-3.79 23.38c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.94 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.93.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3z" />
+                        </svg>
+                        <span id="header-stars">GitHub</span>
+                    </a>
+
+                    <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to light theme">
+                        <svg class="icon-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="icon-sun" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4" />
+                            <path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                        </svg>
+                    </button>
+
+                    <button class="icon-button nav-toggle" id="nav-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-panel" aria-expanded="false">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                        </svg>
                     </button>
                 </div>
             </div>
+
+            <nav class="mobile-panel" id="mobile-panel" aria-label="Mobile">
+                <div class="container">
+                    <a href="#features">Features</a>
+                    <a href="#quick-start">Quick start</a>
+                    <a href="{{ site.baseurl }}/user-manual/">Documentation</a>
+                    <a href="https://github.com/darkterminal/turso-client-http">GitHub</a>
+                </div>
+            </nav>
         </header>
 
         <main id="content">
@@ -68,227 +96,235 @@
                 <img class="hero__watermark" src="{{ site.baseurl }}/images/turso-client-http-logo.png" alt="" aria-hidden="true" width="1254" height="1254" draggable="false" decoding="async" />
                 <div class="container hero-grid">
                     <div class="hero__copy">
-                        <p class="eyebrow">
-                            <span class="eyebrow__dot" aria-hidden="true"></span>
-                            Pure PHP · Hrana over HTTP · No native extension
-                        </p>
-                        <h1>libSQL for PHP,<br /><span class="hero__dim">over plain HTTP.</span></h1>
-                        <p class="lede">
-                            Turso Client HTTP is a pure-PHP client for libSQL and Turso Cloud.
-                            It speaks Hrana over HTTP, runs anywhere <code>ext-curl</code> works,
-                            and gives you a familiar query builder, schema builder, transactions,
-                            and Laravel integration — without compiling a native extension.
+                        <span class="eyebrow mono-label">Open source · MIT · Pure PHP</span>
+                        <h1>libSQL for <em>PHP</em>,<br />over plain HTTP.</h1>
+                        <p class="hero__sub">
+                            Turso Client HTTP speaks Hrana over HTTP — no native extension,
+                            no FFI. Use Turso Cloud or self-hosted sqld from anywhere
+                            <code>ext-curl</code> works.
                         </p>
                         <div class="hero__actions">
-                            <a class="btn btn--primary" href="{{ site.baseurl }}/user-manual/getting-started/">
+                            <a class="btn btn--primary" href="#quick-start">
                                 Get started
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6" />
+                                </svg>
                             </a>
-                            <a class="btn btn--ghost" href="https://github.com/darkterminal/turso-client-http" target="_blank" rel="noopener">
-                                View on GitHub
-                            </a>
+                            <a class="btn btn--secondary" href="{{ site.baseurl }}/user-manual/">Read the manual</a>
                         </div>
-                        <div class="install" data-copy-wrap>
-                            <span class="install__prompt" aria-hidden="true">$</span>
-                            <code class="install__cmd" id="install-cmd">composer require darkterminal/turso-client-http</code>
-                            <button class="install__copy" type="button" data-copy="#install-cmd" aria-label="Copy install command">
-                                <svg class="copy-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                                <svg class="check-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-                            </button>
-                        </div>
-                        <p class="hero__meta">
-                            MIT licensed · PHP 8.3+ · ext-curl/ext-json/ext-mbstring ·
-                            <a href="https://github.com/darkterminal/turso-client-http/releases" target="_blank" rel="noopener">latest release <span id="latest-version">on GitHub</span></a>
-                        </p>
                     </div>
 
                     <div class="hero__visual">
                         <div class="shot-frame">
-                            <div class="shot-frame__bar">
-                                <span class="shot-frame__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                                <span class="shot-frame__title">quick-start.php</span>
+                            <div class="shot-frame__bar" aria-hidden="true">
+                                <span class="shot-frame__dot"></span>
+                                <span class="shot-frame__dot"></span>
+                                <span class="shot-frame__dot"></span>
+                                <span class="shot-frame__label">quick-start.php</span>
                             </div>
-                            <div class="shot-frame__code">
-<pre><code class="language-php"><span class="tok-k">use</span> Darkterminal\TursoHttp\LibSQL;
+                            <div class="shot-frame__body">
+<pre><code><span class="tok-k">use</span> <span class="tok-c">Darkterminal\TursoHttp\LibSQL</span>;
 
 <span class="tok-v">$db</span> = <span class="tok-k">new</span> <span class="tok-f">LibSQL</span>(
-    <span class="tok-s">"libsql://your-db-org.turso.io"</span>,
+    <span class="tok-s">"libsql://db-org.turso.io"</span>,
     [<span class="tok-s">"authToken"</span> =&gt; <span class="tok-v">$token</span>]
 );
 
-<span class="tok-v">$users</span> = <span class="tok-v">$db</span>-&gt;<span class="tok-f">query</span>(
+<span class="tok-v">$rows</span> = <span class="tok-v">$db</span>-&gt;<span class="tok-f">query</span>(
     <span class="tok-s">"SELECT name FROM users WHERE active = ?"</span>,
     [<span class="tok-n">1</span>]
 )-&gt;<span class="tok-f">fetchArray</span>(LibSQL::<span class="tok-c">LIBSQL_ASSOC</span>);</code></pre>
                             </div>
                         </div>
-                        <p class="shot-caption">
-                            One DSN, one client. Query Turso Cloud or a self-hosted sqld over HTTP.
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section--subtle" id="features">
+                <div class="container">
+                    <div class="section__head">
+                        <h2>The libSQL workflow, in pure PHP</h2>
+                        <p>
+                            Install with Composer, connect over HTTP, and use a familiar PHP API.
+                            Same client for Turso Cloud and self-hosted sqld.
                         </p>
                     </div>
-                </div>
-            </section>
-
-            <section class="section">
-                <div class="container">
-                    <div class="section-head section-head--center">
-                        <p class="eyebrow">Why this client</p>
-                        <h2>Portable libSQL access,<br />without native setup.</h2>
-                        <p class="lede">The same libSQL workflow, delivered as a pure-PHP package you can install with Composer.</p>
-                    </div>
-
                     <div class="bento">
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/></svg></div>
+                        <article class="tile tile--w8">
                             <h3>Pure PHP, Hrana over HTTP</h3>
-                            <p>No compiled extension, no FFI. If PHP can make HTTP requests, it can talk to libSQL.</p>
+                            <p>
+                                No compiled extension, no FFI. The client speaks libSQL's Hrana
+                                protocol over HTTP through <code>ext-curl</code>, so it runs in
+                                environments where native extensions are not an option.
+                            </p>
                         </article>
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10M8 9l2 2-2 2m4 0h4"/></svg></div>
-                            <h3>Familiar PHP API</h3>
-                            <p><code>query()</code>, <code>execute()</code>, <code>prepare()</code>, <code>transaction()</code>, and fetch modes that feel at home in PHP.</p>
+                        <article class="tile tile--w4">
+                            <h3>Familiar API</h3>
+                            <p>
+                                <code>query()</code>, <code>execute()</code>, <code>prepare()</code>,
+                                <code>transaction()</code>, and fetch modes that feel natural in PHP.
+                            </p>
                         </article>
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></div>
-                            <h3>Turso Cloud &amp; sqld</h3>
-                            <p>Point the same client at Turso Cloud or a self-hosted <code>libsql-server</code>. Local dev, CI, and production share the same code path.</p>
+                        <article class="tile tile--w4">
+                            <h3>Builders included</h3>
+                            <p>
+                                Fluent query builder and schema builder for common CRUD and table
+                                operations, backed by the same HTTP pipeline.
+                            </p>
                         </article>
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h16v4H4zm0 5h16v4H4zm0 5h16v4H4z"/></svg></div>
-                            <h3>Builder included</h3>
-                            <p>Fluent query builder and schema builder for common CRUD and table operations, backed by the same HTTP pipeline.</p>
-                        </article>
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 7h10v10H7z"/><path d="M4 4h3m10 0h3M4 20h3m10 0h3M4 7v3m0 4v3M20 7v3m0 4v3"/></svg></div>
-                            <h3>Transactions</h3>
-                            <p>Interactive transactions with <code>commit()</code> and <code>rollback()</code>, or batch execution for simple scripts.</p>
-                        </article>
-                        <article class="card">
-                            <div class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2l7 4v6c0 5-3 8-7 10-4-2-7-5-7-10V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
-                            <h3>Laravel ready</h3>
-                            <p>Auto-discovered service provider and facade. Configure <code>TURSO_DATABASE_URL</code>/<code>TURSO_AUTH_TOKEN</code> and inject the client.</p>
+                        <article class="tile tile--w8">
+                            <h3>Cloud, local, and Laravel</h3>
+                            <p>
+                                Point the same code at Turso Cloud or a self-hosted
+                                <code>libsql-server</code>. The package also ships a Laravel
+                                service provider and facade with auto-discovery.
+                            </p>
                         </article>
                     </div>
                 </div>
             </section>
 
-            <section class="section section--surface">
+            <section class="section" id="quick-start">
                 <div class="container">
-                    <div class="section-head">
-                        <p class="eyebrow">Quick start</p>
-                        <h2>Up and running in minutes.</h2>
-                        <p class="lede">Install the package, point it at a libSQL endpoint, and query.</p>
+                    <div class="section__head">
+                        <h2>Install in one command</h2>
+                        <p>Composer package. No extension compile, no php.ini change.</p>
                     </div>
 
-                    <div class="steps">
-                        <article class="step">
-                            <div class="step__head">
-                                <span class="step__num">1</span>
-                                <div>
-                                    <h3>Install</h3>
-                                    <p>Composer pulls the package. No extension compile, no php.ini change.</p>
-                                </div>
-                            </div>
-                            <div class="step__code" data-copy-wrap>
-                                <div class="step__code-bar"><span>terminal</span><button class="code-copy" type="button" data-copy="#code-install" aria-label="Copy"><svg class="copy-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><svg class="check-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></button></div>
-<pre id="code-install"><code>composer require darkterminal/turso-client-http</code></pre>
-                            </div>
-                        </article>
+                    <div class="terminal">
+                        <div class="terminal__bar">
+                            <span class="terminal__dot"></span>
+                            <span class="terminal__dot"></span>
+                            <span class="terminal__dot"></span>
+                            <span class="terminal__title">shell</span>
+                            <button class="copy-btn" id="copy-install" type="button" aria-label="Copy install command">
+                                <svg class="icon-copy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                                    <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+                                </svg>
+                                <svg class="icon-check" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
+                                </svg>
+                            </button>
+                        </div>
+                        <pre><span class="prompt" aria-hidden="true">$</span> <code id="install-command">composer require darkterminal/turso-client-http</code></pre>
+                    </div>
 
-                        <article class="step">
-                            <div class="step__head">
-                                <span class="step__num">2</span>
-                                <div>
-                                    <h3>Connect</h3>
-                                    <p>Use a Turso Cloud URL or a local/self-hosted sqld endpoint.</p>
-                                </div>
-                            </div>
-                            <div class="step__code" data-copy-wrap>
-                                <div class="step__code-bar"><span>connect.php</span><button class="code-copy" type="button" data-copy="#code-connect" aria-label="Copy"><svg class="copy-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><svg class="check-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></button></div>
-<pre id="code-connect"><code class="language-php"><span class="tok-k">use</span> Darkterminal\TursoHttp\LibSQL;
-
-<span class="tok-v">$db</span> = <span class="tok-k">new</span> <span class="tok-f">LibSQL</span>(
-    <span class="tok-s">"libsql://db-org.turso.io"</span>,
-    [<span class="tok-s">"authToken"</span> =&gt; <span class="tok-f">getenv</span>(<span class="tok-s">'TURSO_AUTH_TOKEN'</span>)]
-);</code></pre>
-                            </div>
-                        </article>
-
-                        <article class="step">
-                            <div class="step__head">
-                                <span class="step__num">3</span>
-                                <div>
-                                    <h3>Query</h3>
-                                    <p>Use raw SQL, prepared statements, builders, or transactions — same client.</p>
-                                </div>
-                            </div>
-                            <div class="step__code" data-copy-wrap>
-                                <div class="step__code-bar"><span>query.php</span><button class="code-copy" type="button" data-copy="#code-query" aria-label="Copy"><svg class="copy-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><svg class="check-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></button></div>
-<pre id="code-query"><code class="language-php"><span class="tok-v">$db</span>-&gt;<span class="tok-f">executeBatch</span>(<span class="tok-s">"
-  CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT);
-  INSERT INTO users (name) VALUES ('Ada');
-"</span>);
-
-<span class="tok-v">$rows</span> = <span class="tok-v">$db</span>-&gt;<span class="tok-f">query</span>(<span class="tok-s">"SELECT * FROM users"</span>)
-    -&gt;<span class="tok-f">fetchArray</span>(LibSQL::<span class="tok-c">LIBSQL_ASSOC</span>);</code></pre>
-                            </div>
-                        </article>
+                    <div class="quick-grid">
+                        <div>
+                            <h3>Before you run it</h3>
+                            <ul>
+                                <li>PHP 8.3+ with <code>ext-curl</code>, <code>ext-json</code>, <code>ext-mbstring</code></li>
+                                <li>A Turso Cloud database or self-hosted <code>sqld</code></li>
+                                <li>No native libSQL extension required</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>After install</h3>
+                            <ul>
+                                <li>Create a <code>LibSQL</code> client with your database URL</li>
+                                <li>Run queries, prepared statements, builders, or transactions</li>
+                                <li>Read the <a href="{{ site.baseurl }}/user-manual/">user manual</a> for the full API</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section class="section">
-                <div class="container docs-cta">
-                    <div>
-                        <p class="eyebrow">Documentation</p>
-                        <h2>The manual is the source of truth.</h2>
-                        <p class="lede">Installation, configuration, query/schema builders, transactions, Laravel, troubleshooting, and API reference — kept in <code>docs/</code> alongside the code.</p>
+            <section class="community">
+                <div class="container community__inner">
+                    <div class="stats" aria-label="Repository statistics">
+                        <div class="stat">
+                            <strong id="stars">—</strong>
+                            <span>Stars</span>
+                        </div>
+                        <div class="stat">
+                            <strong id="contributors">—</strong>
+                            <span>Contributors</span>
+                        </div>
+                        <div class="stat">
+                            <strong id="release-tag">latest</strong>
+                            <span>Latest release</span>
+                        </div>
                     </div>
-                    <div class="docs-cta__actions">
-                        <a class="btn btn--primary" href="{{ site.baseurl }}/user-manual/">Read the user manual</a>
-                        <a class="btn btn--ghost" href="https://github.com/darkterminal/turso-client-http/wiki" target="_blank" rel="noopener">Legacy wiki</a>
+                    <div class="community__copy">
+                        <h2>Open source, pure PHP</h2>
+                        <p>
+                            Turso Client HTTP is MIT licensed and built in the open.
+                            The docs in this repository are the source of truth.
+                        </p>
+                        <a class="btn btn--secondary btn--small" href="https://github.com/darkterminal/turso-client-http" target="_blank" rel="noopener noreferrer">
+                            View on GitHub
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M9 7h8v8" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section support">
+                <div class="container support__inner">
+                    <div>
+                        <h2>Need the full picture?</h2>
+                        <p>
+                            The user manual covers configuration, builders, transactions, Laravel, and deployment.
+                        </p>
+                    </div>
+                    <div class="support__links">
+                        <a class="text-link" href="{{ site.baseurl }}/user-manual/">
+                            Read the manual
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                        </a>
+                        <a class="text-link" href="https://github.com/darkterminal/turso-client-http/releases">Releases</a>
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer class="site-footer">
-            <div class="container footer-inner">
-                <div class="footer-brand">
-                    <a class="brand" href="{{ site.baseurl }}/">
-                        <span class="brand__mark" aria-hidden="true">
-                            <img src="{{ site.baseurl }}/images/turso-client-http-logo.png" alt="" width="20" height="20" />
-                        </span>
-                        <span>Turso Client HTTP</span>
-                    </a>
-                    <p>Pure-PHP Hrana over HTTP client for libSQL.<br />MIT licensed.</p>
+        <footer class="footer">
+            <div class="container">
+                <div class="footer__grid">
+                    <div class="footer__about">
+                        <a class="brand" href="{{ site.baseurl }}/">
+                            <span class="brand__mark" aria-hidden="true">
+                                <img src="{{ site.baseurl }}/images/turso-client-http-logo.png" alt="" width="20" height="20" />
+                            </span>
+                            <span>Turso Client HTTP</span>
+                        </a>
+                        <p>
+                            Pure-PHP Hrana over HTTP client for libSQL.
+                            No native extension required.
+                        </p>
+                    </div>
+                    <div class="footer__col">
+                        <h3>Resources</h3>
+                        <ul>
+                            <li><a href="{{ site.baseurl }}/user-manual/">Manual</a></li>
+                            <li><a href="{{ site.baseurl }}/user-manual/getting-started/">Getting started</a></li>
+                            <li><a href="{{ site.baseurl }}/user-manual/reference/libsql-class/">API reference</a></li>
+                            <li><a href="https://github.com/darkterminal/turso-client-http/releases">Releases</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer__col">
+                        <h3>Project</h3>
+                        <ul>
+                            <li><a href="https://github.com/darkterminal/turso-client-http">GitHub</a></li>
+                            <li><a href="https://github.com/darkterminal/turso-client-http/issues">Issues</a></li>
+                            <li><a href="https://github.com/darkterminal/turso-client-http/blob/main/LICENSE">License</a></li>
+                        </ul>
+                    </div>
                 </div>
-                <nav class="footer-cols" aria-label="Footer">
-                    <div class="footer-col">
-                        <h4>Documentation</h4>
-                        <a href="{{ site.baseurl }}/user-manual/">User manual</a>
-                        <a href="{{ site.baseurl }}/user-manual/getting-started/">Getting started</a>
-                        <a href="{{ site.baseurl }}/user-manual/reference/libsql-class/">API reference</a>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Project</h4>
-                        <a href="https://github.com/darkterminal/turso-client-http" target="_blank" rel="noopener">GitHub</a>
-                        <a href="https://github.com/darkterminal/turso-client-http/releases" target="_blank" rel="noopener">Releases</a>
-                        <a href="https://github.com/darkterminal/turso-client-http/issues" target="_blank" rel="noopener">Issues</a>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Community</h4>
-                        <a href="https://discord.gg/turso" target="_blank" rel="noopener">Discord</a>
-                        <a href="https://github.com/sponsors/darkterminal" target="_blank" rel="noopener">Sponsor</a>
-                    </div>
-                </nav>
-            </div>
-            <div class="container footer-bottom">
-                <span>Copyright &copy; <span id="footer-year"></span> Turso Client HTTP contributors.</span>
-                <span>Built with plain HTML, CSS, and JS.</span>
+                <div class="footer__bottom">
+                    <span>
+                        © <span id="year">2026</span> Turso Client HTTP ·
+                        <span id="release-tag">latest</span> · MIT
+                    </span>
+                    <a href="{{ site.baseurl }}/user-manual/">Manual</a>
+                </div>
             </div>
         </footer>
 
-        <script src="{{ site.baseurl }}/assets/js/landing.js"></script>
+        <script src="{{ '/assets/js/landing.js' | relative_url }}" defer></script>
     </body>
 </html>
