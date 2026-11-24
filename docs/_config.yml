@@ -1,0 +1,33 @@
+title: Turso Client HTTP
+tagline: Pure-PHP Hrana HTTP client for libSQL
+description: >-
+  Turso Client HTTP is a pure-PHP libSQL client that speaks Hrana over HTTP.
+  It runs anywhere ext-curl works — no native extension required — with a
+  fluent query builder, schema builder, transactions, and Laravel integration.
+url: https://darkterminal.github.io
+baseurl: /turso-client-http
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+permalink: pretty
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+  - _site
+
+defaults:
+  - scope:
+      path: "user-manual"
+    values:
+      layout: manual

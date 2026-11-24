@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img alt="Turso + HTTP Client" src="https://i.imgur.com/URmAyKX.png">
+  <img alt="Turso Client HTTP" src="art/turso-client-http-banner.png" width="800">
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
 </p>
 
 <p align="center">
-  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and the <a href="https://github.com/tursodatabase/turso-client-php/">libSQL Database API</a>.
+  SQLite for Production. Powered by <a href="https://turso.tech/libsql">libSQL</a> and the <a href="https://docs.turso.tech/sdk/http/reference">Hrana HTTP API</a>.
 </p>
 
 <p align="center">
@@ -40,8 +40,9 @@
 </p>
 
 <p align="center">
-  Full user manual & tutorial now lives on the
-  <a href="https://github.com/darkterminal/turso-client-http/wiki">Wiki</a>.
+  Full documentation now lives on the
+  <a href="https://darkterminal.github.io/turso-client-http/">Docs site</a>.
+  The <a href="https://github.com/darkterminal/turso-client-http/wiki">wiki</a> is legacy.
 </p>
 
 ---
