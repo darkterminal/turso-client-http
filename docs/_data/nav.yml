@@ -1,0 +1,42 @@
+- section: Getting started
+  items:
+    - title: User Manual
+      url: /user-manual/
+    - title: Getting Started
+      url: /user-manual/getting-started/
+    - title: Configuration
+      url: /user-manual/configuration/
+
+- section: Connections
+  items:
+    - title: Local / sqld
+      url: /user-manual/local-connection/
+    - title: Remote / Turso Cloud
+      url: /user-manual/remote-connection/
+
+- section: Usage
+  items:
+    - title: Query Builder
+      url: /user-manual/query-builder/
+    - title: Schema Builder
+      url: /user-manual/schema-builder/
+    - title: Transactions & Pipeline
+      url: /user-manual/transactions/
+    - title: Laravel
+      url: /user-manual/laravel/
+
+- section: Operations
+  items:
+    - title: Error Semantics
+      url: /user-manual/error-semantics/
+    - title: Production Deployment
+      url: /user-manual/production-deployment/
+    - title: Troubleshooting
+      url: /user-manual/troubleshooting/
+
+- section: Reference
+  items:
+    - title: LibSQL
+      url: /user-manual/reference/libsql-class/
+    - title: LibSQLResult
+      url: /user-manual/reference/result-class/
