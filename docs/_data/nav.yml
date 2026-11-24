@@ -1,42 +1,46 @@
-- section: Getting started
-  items:
-    - title: User Manual
-      url: /user-manual/
-    - title: Getting Started
-      url: /user-manual/getting-started/
-    - title: Configuration
-      url: /user-manual/configuration/
+- title: User Manual
+  url: /user-manual/
+  section: Getting started
+- title: Getting Started
+  url: /user-manual/getting-started/
+  section: Getting started
+- title: Configuration
+  url: /user-manual/configuration/
+  section: Getting started
 
-- section: Connections
-  items:
-    - title: Local / sqld
-      url: /user-manual/local-connection/
-    - title: Remote / Turso Cloud
-      url: /user-manual/remote-connection/
+- title: Local / sqld
+  url: /user-manual/local-connection/
+  section: Connections
+- title: Remote / Turso Cloud
+  url: /user-manual/remote-connection/
+  section: Connections
 
-- section: Usage
-  items:
-    - title: Query Builder
-      url: /user-manual/query-builder/
-    - title: Schema Builder
-      url: /user-manual/schema-builder/
-    - title: Transactions & Pipeline
-      url: /user-manual/transactions/
-    - title: Laravel
-      url: /user-manual/laravel/
+- title: Query Builder
+  url: /user-manual/query-builder/
+  section: Usage
+- title: Schema Builder
+  url: /user-manual/schema-builder/
+  section: Usage
+- title: Transactions & Pipeline
+  url: /user-manual/transactions/
+  section: Usage
+- title: Laravel
+  url: /user-manual/laravel/
+  section: Usage
 
-- section: Operations
-  items:
-    - title: Error Semantics
-      url: /user-manual/error-semantics/
-    - title: Production Deployment
-      url: /user-manual/production-deployment/
-    - title: Troubleshooting
-      url: /user-manual/troubleshooting/
+- title: Error Semantics
+  url: /user-manual/error-semantics/
+  section: Operations
+- title: Production Deployment
+  url: /user-manual/production-deployment/
+  section: Operations
+- title: Troubleshooting
+  url: /user-manual/troubleshooting/
+  section: Operations
 
-- section: Reference
-  items:
-    - title: LibSQL
-      url: /user-manual/reference/libsql-class/
-    - title: LibSQLResult
-      url: /user-manual/reference/result-class/
+- title: LibSQL
+  url: /user-manual/reference/libsql-class/
+  section: Reference
+- title: LibSQLResult
+  url: /user-manual/reference/result-class/
+  section: Reference
