@@ -1,18 +1,16 @@
+<p align="center">
+  <a href="https://discord.gg/9eAaMnJtfY">
+    <img src="art/support-my-work-banner.png" alt="Support my work - Turso PHP Ecosystem" width="1000">
+  </a>
+</p>
+
 > [!IMPORTANT]
 > This package is a **pure-PHP HTTP client** (**Hrana over HTTP**) for libSQL — it is
 > not the libSQL PHP extension, and it does not link against any native library. If you
 > want the native extension, use the turso-driver for your framework instead; this one
 > runs anywhere ext-curl works, including shared hosting and CI runners.
 
-<p align="center">
-  <a href="https://discord.gg/9eAaMnJtfY">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
-      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
-    </picture>
-  </a>
-</p>
+
 
 <p align="center">
   <img alt="Turso Client HTTP" src="art/turso-client-http-banner.png" width="800">
@@ -20,7 +18,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/darkterminal/turso-client-http?color=F05340" alt="MIT License" /></a>
-  <a href="https://tur.so/discord-php"><img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" /></a>
+  <a href="https://discord.gg/9eAaMnJtfY"><img src="https://img.shields.io/discord/933071162680958986?color=F05340" alt="Discord" /></a>
   <a href="#contributors"><img src="https://img.shields.io/github/contributors/darkterminal/turso-client-http?color=F05340" alt="Contributors" /></a>
   <a href="https://packagist.org/packages/darkterminal/turso-client-http"><img src="https://img.shields.io/packagist/dt/darkterminal/turso-client-http?color=F05340" alt="Total downloads" /></a>
   <a href="https://github.com/darkterminal/turso-client-http/tags"><img src="https://img.shields.io/github/v/tag/darkterminal/turso-client-http?label=version&color=F05340" alt="Version Tag" /></a>
